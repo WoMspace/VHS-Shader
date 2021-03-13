@@ -1,5 +1,7 @@
 #version 130
 
+//#include "lib/noiseFuncs.glsl"
+
 #define CHROMA_SAMPLING_SIZE 4.0// How big the chroma subsampling should be. Larger number = bigger artefacting.[1.0 2.0 3.0 4.0 5.0]
 #define CHROMA_SAMPLING_ENABLED // Should the chroma sub-sampling effect be used.
 
@@ -30,7 +32,7 @@ void main() {
 
 	#ifdef GRAIN_ENABLED	
 		float noiseSeed = frameCounter * 0.11;
-		vec2 noiseCoord = texcoord + vec2(noiseSeed, 1-noiseSeed);
+		vec2 noiseCoord = texcoord + vec2(sin(noiseSeed), cos(noiseSeed));
 		color -= texture2D(noisetex, noiseCoord).rgb*GRAIN_STRENGTH;
 	#endif
 
@@ -61,8 +63,7 @@ void main() {
 				if(moduloPixLoc < 2 && moduloPixLoc > 1)
 				{
 					color = vec3(0.0, color.g, 0.0);
-				}
-				if(moduloPixLoc < 3 && moduloPixLoc > 2)
+				}(moduloPixLoc < 3 && moduloPixLoc > 2)
 				{
 					color = vec3(0.0, 0.0, color.b);
 				}

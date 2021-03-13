@@ -1,6 +1,7 @@
 #version 130
 
 // #define USE_INTERLACING // An interlacing effect. With help from Sir Bird.
+#define INTERLACING_SIZE 4.0 // How big the interlaced lines are. Good for HiDPI displays. [2.0 3.0 4.0 5.0 6.0 7.0 8.0 9.0 10.0 15.0 20.0 30.0 40.0 50.0]
 // #define USE_GHOSTING // Ghosting effect.
 #define GHOSTING_STRENGTH 0.7 // The strength of the ghosting. [0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9]
 
@@ -30,7 +31,7 @@ void main()
     vec3 color3PlzShootMe = color;
     #ifdef USE_INTERLACING
         //if (sin(viewHeight*texcoord.y)*(mod(float(frameCounter),2.)*2.-1.) < 0.) //sir bird's version
-        if(mod(gl_FragCoord.y, 4.0) > 1.5)
+        if(mod(gl_FragCoord.y, INTERLACING_SIZE) > (INTERLACING_SIZE - 1)*0.5)
         {
             color = texture2D(colortex3, texcoord).rgb;
         }
