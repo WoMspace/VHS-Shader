@@ -7,6 +7,8 @@
 #define SCANLINE_STRENGTH 0.1 // How strong the scanline effect is. [0.01 0.05 0.1 0.2 0.3 0.4 0.5]
 #define SCANLINE_THICKNESS 1 // How thick the lines are. [1 2 3 4 5 6 7 8 9 10]
 #define SCANLINE_ENABLED // Should the scanlines effect be used.
+// #define CRT_SCANLINE // Simulate individual pixels. Replaces the scanlines.
+#define CRT_BOOST 0.1 // Boosts the brightness a bit to make it less dark. [0.0 0.1 0.2 0.3 0.4 0.5]
 
 const int noiseTextureResolution = 512; // Size of the noise texture. Smaller number = bigger noise. [64 128 256 512 1024]
 #define GRAIN_STRENGTH 0.15 // How strong the noise is. [0.05 0.10 0.15 0.20 0.25 0.30 0.35 0.40 0.45 0.50]
@@ -39,10 +41,34 @@ void main() {
 	#endif
 
 	#ifdef SCANLINE_ENABLED
-		if(mod(gl_FragCoord.y, SCANLINE_DISTANCE) < SCANLINE_THICKNESS)
-		{
-			color -= SCANLINE_STRENGTH;
-		}
+		#ifndef CRT_SCANLINE
+			if(mod(gl_FragCoord.y, SCANLINE_DISTANCE) < SCANLINE_THICKNESS)
+			{
+				color -= SCANLINE_STRENGTH;
+			}
+		#else
+			float moduloPixLoc = mod(gl_FragCoord.x, 3);
+			if(mod(gl_FragCoord.y, 4) > 1)
+			{
+				if(moduloPixLoc < 1)
+				{
+					color = vec3(color.r, 0.0, 0.0);
+				}
+				if(moduloPixLoc < 2 && moduloPixLoc > 1)
+				{
+					color = vec3(0.0, color.g, 0.0);
+				}
+				if(moduloPixLoc < 3 && moduloPixLoc > 2)
+				{
+					color = vec3(0.0, 0.0, color.b);
+				}
+			}
+			else
+			{
+				color = vec3(CRT_BOOST);
+			}
+		
+		#endif
 	#endif
 	//color += (1 - mod(gl_FragCoord.y, SCANLINE_DISTANCE))*SCANLINE_STRENGTH;
 
