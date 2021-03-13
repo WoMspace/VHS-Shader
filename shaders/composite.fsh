@@ -6,7 +6,7 @@
 #define SCANLINE_DISTANCE 5 // How many pixels between each line. [1 2 3 4 5 6 7 8 9 10 20 30 40 50 100 200]
 #define SCANLINE_STRENGTH 0.1 // How strong the scanline effect is. [0.01 0.05 0.1 0.2 0.3 0.4 0.5]
 #define SCANLINE_THICKNESS 1 // How thick the lines are. [1 2 3 4 5 6 7 8 9 10]
-#define SCANLINE_ENABLED // Should the scanlines effect be used.
+#define SCANLINE_MODE 1 // Which Scanline effect to use. [0 1 2 3]
 // #define CRT_SCANLINE // Simulate individual pixels. Replaces the scanlines.
 #define CRT_BOOST 0.1 // Boosts the brightness a bit to make it less dark. [0.0 0.1 0.2 0.3 0.4 0.5]
 
@@ -40,13 +40,17 @@ void main() {
 		color = chroma * luma * 0.9;
 	#endif
 
-	#ifdef SCANLINE_ENABLED
-		#ifndef CRT_SCANLINE
+	#if SCANLINE_MODE != 0
+		#if SCANLINE_MODE == 1
 			if(mod(gl_FragCoord.y, SCANLINE_DISTANCE) < SCANLINE_THICKNESS)
 			{
 				color -= SCANLINE_STRENGTH;
 			}
-		#else
+		#endif
+		#if SCANLINE_MODE == 2
+			color *= 0.92+0.08*(0.05-pow(clamp(sin(viewHeight/2.*texcoord.y+frameCounter/5.),0.,1.),1.5));
+		#endif
+		#if SCANLINE_MODE == 3
 			float moduloPixLoc = mod(gl_FragCoord.x, 3);
 			if(mod(gl_FragCoord.y, 4) > 1)
 			{
@@ -67,11 +71,9 @@ void main() {
 			{
 				color = vec3(CRT_BOOST);
 			}
-		
 		#endif
 	#endif
-	//color += (1 - mod(gl_FragCoord.y, SCANLINE_DISTANCE))*SCANLINE_STRENGTH;
 
-/* DRAWBUFFERS:0 */
+/* DRAWBUFFERS:01234 */
 	gl_FragData[0] = vec4(color, 1.0); //gcolor
 }

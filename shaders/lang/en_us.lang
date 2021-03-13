@@ -1,0 +1,7 @@
+option.SCANLINE_MODE=Mode
+value.SCANLINE_MODE.0=Disabled
+value.SCANLINE_MODE.1=WoMspace Scanlines
+value.SCANLINE_MODE.2=SirBird Scanlines
+value.SCANLINE_MODE.3=CRT Scanlines
+
+option.USE_INTERLACING=Interlacing
