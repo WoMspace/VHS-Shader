@@ -63,7 +63,8 @@ void main() {
 				if(moduloPixLoc < 2 && moduloPixLoc > 1)
 				{
 					color = vec3(0.0, color.g, 0.0);
-				}(moduloPixLoc < 3 && moduloPixLoc > 2)
+				}
+				if(moduloPixLoc < 3 && moduloPixLoc > 2)
 				{
 					color = vec3(0.0, 0.0, color.b);
 				}
