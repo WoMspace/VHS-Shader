@@ -7,5 +7,4 @@ Todo
 - CRT Distortion
 - Load in dimension rewind effect
 - Ghosting
-- Interlacing
 - FILM MODE???
