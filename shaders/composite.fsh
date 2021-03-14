@@ -1,4 +1,4 @@
-#version 130
+#version 330
 
 //#include "lib/noiseFuncs.glsl"
 
@@ -19,6 +19,14 @@ const int noiseTextureResolution = 512; // Size of the noise texture. Smaller nu
 #define ROUND_FOG_ENABLED // Should the fog effect be used.
 #define FOG_END far // How far away the fog should end. [32 64 128 far]
 #define FOG_NEAR 32 // How far away the fog should start. [0 2 4 8 16 32 64]
+#define WATER_FOG_R 0.1// Red channel of the water fog. [0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
+#define WATER_FOG_G 0.2// Green channel of the water fog. [0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
+#define WATER_FOG_B 0.5// Blue channel of the water fog. [0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
+#define WATER_FOG_DISTANCE 32.0 // How far the water fog should go. [16.0 32.0 64.0]
+#define LAVA_FOG_R 1.0// Red channel of the water fog. [0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
+#define LAVA_FOG_G 0.5// Green channel of the water fog. [0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
+#define LAVA_FOG_B 0.0// Blue channel of the water fog. [0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
+#define LAVA_FOG_DISTANCE 2.0 // How far the lava fog should go. [1.0 2.0 4.0 8.0]
 
 
 uniform sampler2D gcolor;
@@ -30,6 +38,7 @@ uniform float viewHeight;
 uniform vec3 fogColor;
 uniform mat4 gbufferProjectionInverse;
 uniform float far;
+uniform int isEyeInWater; //0 = air, 1 = water, 2 = lava
 
 const bool colortex0MipmapEnabled = true;
 
@@ -49,9 +58,33 @@ void main() {
 		vec3 clipPos = screenPos * 2.0 - 1.0;
 		vec4 tmp = gbufferProjectionInverse * vec4(clipPos, 1.0);
 		vec3 viewPos = tmp.xyz / tmp.w;
-		//float fogDensity = exp(-FOG_END * length(viewPos));
 
-		color = mix(color, fogColor, clamp((length(viewPos)-FOG_NEAR)/FOG_END, 0.0, 1.0));
+		vec3 customFogColor;
+		float fogNearValue;
+		float fogFarValue;
+
+		switch(isEyeInWater)
+		{
+			case 0: //air
+				customFogColor = fogColor;
+				fogNearValue = FOG_NEAR;
+				fogFarValue = FOG_END;
+				break;
+			case 1: //water
+				customFogColor = vec3(WATER_FOG_R, WATER_FOG_G, WATER_FOG_B);
+				fogNearValue = 0.0;
+				fogFarValue = WATER_FOG_DISTANCE;
+				break;
+			case 2: //lava
+				customFogColor = vec3(LAVA_FOG_R, LAVA_FOG_G, LAVA_FOG_B);
+				fogNearValue = 0.0;
+				fogFarValue = LAVA_FOG_DISTANCE;
+				break;
+		}
+		
+		//float fogDensity = exp(-FOG_END * length(viewPos));
+		color = mix(color, fogColor, clamp((length(viewPos)-fogNearValue)/fogFarValue, 0.0, 1.0));
+		
 	#endif
 
 	#ifdef GRAIN_ENABLED	
