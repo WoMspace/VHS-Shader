@@ -83,7 +83,10 @@ void main() {
 		}
 		
 		//float fogDensity = exp(-FOG_END * length(viewPos));
-		color = mix(color, fogColor, clamp((length(viewPos)-fogNearValue)/fogFarValue, 0.0, 1.0));
+		if(texture2D(depthtex0, texcoord).r != 1.0)
+		{
+			color = mix(color, fogColor, clamp((length(viewPos)-fogNearValue)/fogFarValue, 0.0, 1.0));
+		}
 		
 	#endif
 
