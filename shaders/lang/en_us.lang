@@ -1,16 +1,36 @@
+option.CHROMA_SAMPLING_SIZE=Chroma Sampling Size
+option.CHROMA_SAMPLING_ENABLED=CHROMA SAMPLING
+
 option.SCANLINE_MODE=Mode
+option.SCANLINE_DISTANCE=Scanline Distance
+option.SCANLINE_STRENGTH=Scanline Strength
+option.SCANLINE_THICKNESS=Scanline Thickness
 value.SCANLINE_MODE.0=Disabled
 value.SCANLINE_MODE.1=WoMspace Scanlines
 value.SCANLINE_MODE.2=SirBird Scanlines
 value.SCANLINE_MODE.3=CRT Scanlines
+option.CRT_BOOST=CRT Boost
+
+option.GRAIN_STRENGTH=Grain Strength
+option.GRAIN_ENABLED=GRAIN
+option.noiseTextureResolution = Inverse Grain Size
+
+option.ROUND_FOG_ENABLED=Shader Fog
+option.FOG_END=Fog End
+option.FOG_NEAR=Fog Start
+value.FOG_END.far=Render Distance
+
+option.WATER_FOG_DISTANCE=Water Fog Distance
+option.WATER_FOG_R=Water Fog Red
+option.WATER_FOG_G=Water Fog Green
+option.WATER_FOG_B=Water Fog Blue
+
+option.LAVA_FOG_DISTANCE=Lava Fog Distance
+option.LAVA_FOG_R=Lava Fog Red
+option.LAVA_FOG_G=Lava Fog Green
+option.LAVA_FOG_B=Lava Fog Blue
 
 option.USE_INTERLACING=INTERLACING
-option.INTERLACING_SIZE= INTERLACING SIZE
+option.INTERLACING_SIZE= Interlacing Size
 option.USE_GHOSTING=GHOSTING
-option.GHOSTING_STRENGTH = GHOSTING STRENGTH
-
-option.noiseTextureResolution = INVERSE GRAIN SIZE
-
-option.FOG_END=FOG END
-option.FOG_NEAR=FOG START
-value.FOG_END.far=Render Distance
+option.GHOSTING_STRENGTH = Ghosting Strength

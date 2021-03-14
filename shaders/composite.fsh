@@ -9,7 +9,6 @@
 #define SCANLINE_STRENGTH 0.1 // How strong the scanline effect is. [0.01 0.05 0.1 0.2 0.3 0.4 0.5]
 #define SCANLINE_THICKNESS 1 // How thick the lines are. [1 2 3 4 5 6 7 8 9 10]
 #define SCANLINE_MODE 1 // Which Scanline effect to use. [0 1 2 3]
-// #define CRT_SCANLINE // Simulate individual pixels. Replaces the scanlines.
 #define CRT_BOOST 0.1 // Boosts the brightness a bit to make it less dark. [0.0 0.1 0.2 0.3 0.4 0.5]
 
 const int noiseTextureResolution = 512; // Size of the noise texture. Smaller number = bigger noise. [64 128 256 512 1024]
@@ -85,7 +84,7 @@ void main() {
 		//float fogDensity = exp(-FOG_END * length(viewPos));
 		if(texture2D(depthtex0, texcoord).r != 1.0)
 		{
-			color = mix(color, fogColor, clamp((length(viewPos)-fogNearValue)/fogFarValue, 0.0, 1.0));
+			color = mix(color, fogColor, clamp(((length(viewPos)-fogNearValue)/fogFarValue), 0.0, 1.0));
 		}
 		
 	#endif
