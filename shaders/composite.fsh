@@ -16,30 +16,48 @@ const int noiseTextureResolution = 512; // Size of the noise texture. Smaller nu
 #define GRAIN_STRENGTH 0.15 // How strong the noise is. [0.05 0.10 0.15 0.20 0.25 0.30 0.35 0.40 0.45 0.50]
 #define GRAIN_ENABLED // Should the grain effect be used.
 
+#define ROUND_FOG_ENABLED // Should the fog effect be used.
+#define FOG_END far // How far away the fog should end. [32 64 128 far]
+#define FOG_NEAR 32 // How far away the fog should start. [0 2 4 8 16 32 64]
+
+
 uniform sampler2D gcolor;
 uniform sampler2D noisetex;
+uniform sampler2D depthtex0;
 uniform int frameCounter;
 uniform float viewWidth;
 uniform float viewHeight;
+uniform vec3 fogColor;
+uniform mat4 gbufferProjectionInverse;
+uniform float far;
 
 const bool colortex0MipmapEnabled = true;
 
 varying vec2 texcoord;
-varying vec4 gl_FragCoord;
 
 void main() {
 	vec3 color = texture2D(gcolor, texcoord).rgb;
-
-	#ifdef GRAIN_ENABLED	
-		float noiseSeed = frameCounter * 0.11;
-		vec2 noiseCoord = texcoord + vec2(sin(noiseSeed), cos(noiseSeed));
-		color -= texture2D(noisetex, noiseCoord).rgb*GRAIN_STRENGTH;
-	#endif
 
 	#ifdef CHROMA_SAMPLING_ENABLED
 		vec3 chroma = normalize(textureLod(gcolor, texcoord, CHROMA_SAMPLING_SIZE).rgb);
 		float luma = (color.r + color.g + color.b / 3.0);
 		color = chroma * luma * 0.9;
+	#endif
+
+	#ifdef ROUND_FOG_ENABLED
+		vec3 screenPos = vec3(texcoord, texture2D(depthtex0, texcoord).r);
+		vec3 clipPos = screenPos * 2.0 - 1.0;
+		vec4 tmp = gbufferProjectionInverse * vec4(clipPos, 1.0);
+		vec3 viewPos = tmp.xyz / tmp.w;
+		//float fogDensity = exp(-FOG_END * length(viewPos));
+
+		color = mix(color, fogColor, clamp((length(viewPos)-FOG_NEAR)/FOG_END, 0.0, 1.0));
+	#endif
+
+	#ifdef GRAIN_ENABLED	
+		float noiseSeed = frameCounter * 0.11;
+		vec2 noiseCoord = texcoord + vec2(sin(noiseSeed), cos(noiseSeed));
+		color -= texture2D(noisetex, noiseCoord).rgb*GRAIN_STRENGTH;
 	#endif
 
 	#if SCANLINE_MODE != 0

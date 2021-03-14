@@ -27,6 +27,7 @@ varying vec4 gl_FragCoord;
 void main()
 {
     vec3 color = texture2D(gcolor, texcoord).rgb;
+    
     vec3 color2ElectricBoogaloo = color;
     vec3 color3PlzShootMe = color;
     #ifdef USE_INTERLACING
@@ -41,7 +42,6 @@ void main()
         color3PlzShootMe = mix(color3PlzShootMe, color, 1 - GHOSTING_STRENGTH);
         color = (color + color3PlzShootMe)*0.5;
     #endif
-
     /* DRAWBUFFERS:034 */
 	gl_FragData[0] = vec4(color, 1.0); //gcolor
     gl_FragData[1] = vec4(color2ElectricBoogaloo, 1.0); //colortex3

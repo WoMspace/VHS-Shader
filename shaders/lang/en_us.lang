@@ -10,3 +10,7 @@ option.USE_GHOSTING=GHOSTING
 option.GHOSTING_STRENGTH = GHOSTING STRENGTH
 
 option.noiseTextureResolution = INVERSE GRAIN SIZE
+
+option.FOG_END=FOG END
+option.FOG_NEAR=FOG START
+value.FOG_END.far=Render Distance
