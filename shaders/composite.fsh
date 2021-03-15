@@ -4,7 +4,7 @@
 #define CHROMA_SAMPLING_ENABLED // Should the chroma sub-sampling effect be used.
 
 // #define BARREL_DISTORTION // Causes a rounding of the image.
-#define BARREL_POWER -0.5 // How strong the lens distortion should be. Negative = Barrel Distortion. Positive = Pincushion Distortion. [-0.5 -0.4 -0.3 -0.2 -0.1 0.1 0.2 0.3 0.4 0.5]
+#define BARREL_POWER -0.5 // How strong the lens distortion should be. Negative = Barrel Distortion. Positive = Pincushion Distortion. [-1.0 -0.9 -0.8 -0.7 -0.6 -0.5 -0.4 -0.3 -0.2 -0.1 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
 #define BARREL_CLIP_BLACK 0
 #define BARREL_CLIP_ZOOM 1
 #define BARREL_CLIP_OFF 2
