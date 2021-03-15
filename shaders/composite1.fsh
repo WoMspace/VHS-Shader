@@ -24,12 +24,16 @@ varying vec4 gl_FragCoord;
     uniform sampler2D colortex4;
 #endif
 
+
+
 void main()
 {
     vec3 color = texture2D(gcolor, texcoord).rgb;
     
     vec3 color2ElectricBoogaloo = color;
     vec3 color3PlzShootMe = color;
+
+    
     #ifdef USE_INTERLACING
         //if (sin(viewHeight*texcoord.y)*(mod(float(frameCounter),2.)*2.-1.) < 0.) //sir bird's version
         if(mod(gl_FragCoord.y, INTERLACING_SIZE) > (INTERLACING_SIZE - 1)*0.5)

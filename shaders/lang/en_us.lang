@@ -5,16 +5,23 @@ option.SCANLINE_MODE=Mode
 option.SCANLINE_DISTANCE=Scanline Distance
 option.SCANLINE_STRENGTH=Scanline Strength
 option.SCANLINE_THICKNESS=Scanline Thickness
-value.SCANLINE_MODE.0=Disabled
-value.SCANLINE_MODE.1=WoMspace Scanlines
-value.SCANLINE_MODE.2=SirBird Scanlines
-value.SCANLINE_MODE.3=CRT Scanlines
+value.SCANLINE_MODE.SCANLINE_MODE_OFF=Disabled
+value.SCANLINE_MODE.SCANLINE_MODE_WOMSPACE=WoMspace Scanlines
+value.SCANLINE_MODE.SCANLINE_MODE_SIRBIRD=SirBird Scanlines
+value.SCANLINE_MODE.SCANLINE_MODE_CRT=CRT Scanlines
 option.CRT_BOOST=CRT Boost
+option.BARREL_DISTORTION=Barrel Distortion
+option.BARREL_POWER=Barrel Distortion Power
+option.BARREL_CLIP_MODE=Barrel Clipping
+value.BARREL_CLIP_MODE.BARREL_CLIP_BLACK=Black Bars
+value.BARREL_CLIP_MODE.BARREL_CLIP_ZOOM=Zoom
+value.BARREL_CLIP_MODE.BARREL_CLIP_OFF=Off
 
 option.GRAIN_STRENGTH=Grain Strength
 option.GRAIN_ENABLED=GRAIN
 option.noiseTextureResolution = Inverse Grain Size
 
+screen.LIQUID_FOG=LIQUID FOG
 option.ROUND_FOG_ENABLED=Shader Fog
 option.FOG_END=Fog End
 option.FOG_NEAR=Fog Start
