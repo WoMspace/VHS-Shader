@@ -8,7 +8,6 @@
 uniform sampler2D gcolor;
 
 varying vec2 texcoord;
-varying vec4 gl_FragCoord;
 
 #ifdef USE_INTERLACING
     uniform sampler2D colortex3;
