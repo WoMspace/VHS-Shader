@@ -1,32 +1,11 @@
 #version 130
 
-#include "lib/Tonemapping.glsl"
+/* THIS FILE IS FOR PRE-SCREEN EFFECTS
+- Fog
+- Dof pass 1
+*/
 
-//#define ENABLE_ACES // HIGHLY BROKEN!
-
-#define CHROMA_SAMPLING_SIZE 4.0// How big the chroma subsampling should be. Larger number = bigger artefacting.[1.0 2.0 3.0 4.0 5.0]
-#define CHROMA_SAMPLING_ENABLED // Should the chroma sub-sampling effect be used.
-
-// #define BARREL_DISTORTION // Causes a rounding of the image.
-#define BARREL_POWER -0.5 // How strong the lens distortion should be. Negative = Barrel Distortion. Positive = Pincushion Distortion. [-1.0 -0.9 -0.8 -0.7 -0.6 -0.5 -0.4 -0.3 -0.2 -0.1 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
-#define BARREL_CLIP_BLACK 0
-#define BARREL_CLIP_ZOOM 1
-#define BARREL_CLIP_OFF 2
-#define BARREL_CLIP_MODE BARREL_CLIP_BLACK // How should barrel distortion artefacts be fixed. Black fills in the broken areas with black. Zoom enlarges the image to hide the broken areas. [BARREL_CLIP_BLACK BARREL_CLIP_ZOOM BARREL_CLIP_OFF]
-
-#define SCANLINE_DISTANCE 5 // How many pixels between each line. [1 2 3 4 5 6 7 8 9 10 20 30 40 50 100 200]
-#define SCANLINE_STRENGTH 0.1 // How strong the scanline effect is. [0.01 0.05 0.1 0.2 0.3 0.4 0.5]
-#define SCANLINE_THICKNESS 1 // How thick the lines are. [1 2 3 4 5 6 7 8 9 10]
-#define SCANLINE_MODE_OFF 0
-#define SCANLINE_MODE_WOMSPACE 1
-#define SCANLINE_MODE_SIRBIRD 2
-#define SCANLINE_MODE_CRT 3
-#define SCANLINE_MODE SCANLINE_MODE_WOMSPACE // Which Scanline effect to use. [SCANLINE_MODE_OFF SCANLINE_MODE_WOMSPACE SCANLINE_MODE_SIRBIRD SCANLINE_MODE_CRT]
-#define CRT_BOOST 0.1 // Boosts the brightness a bit to make it less dark. [0.0 0.1 0.2 0.3 0.4 0.5]
-
-const int noiseTextureResolution = 512; // Size of the noise texture. Smaller number = bigger noise. [64 128 256 512 1024]
-#define GRAIN_STRENGTH 0.15 // How strong the noise is. [0.05 0.10 0.15 0.20 0.25 0.30 0.35 0.40 0.45 0.50]
-#define GRAIN_ENABLED // Should the grain effect be used.
+#include "lib/Blurs.glsl"
 
 #define ROUND_FOG_ENABLED // Should the fog effect be used.
 #define FOG_END far // How far away the fog should end. [32 64 128 far]
@@ -41,87 +20,32 @@ const int noiseTextureResolution = 512; // Size of the noise texture. Smaller nu
 #define LAVA_FOG_DISTANCE 2.0 // How far the lava fog should go. [1.0 2.0 4.0 8.0]
 #define pi 3.14159 //pi babey
 
+// #define ENABLE_DOF // Adds Depth of Field
+#define DOF_MIP 0 // Really low quality. Really fast.
+#define DOF_GAUSSIAN 1 // Higher quality. Pretty fast.
+#define DOF_BOKEH 2 // Very high quality. Slowest.
+#define DOF_MODE DOF_GAUSSIAN // Mipmap is REALLY fast, but low quality. Gaussian is pretty fast, but a lot higher quality. Bokeh is slowest, but REALLY high quality. [DOF_MIP DOF_GAUSSIAN DOF_BOKEH]
+#define DOF_STRENGTH 0.2 // How strong the blur should be. [0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
+const float centerDepthHalflife = 0.5; // How fast the focus should move. In seconds. [0.0 0.25 0.5 0.75 1.0 1.5 2.0]
 
 uniform sampler2D gcolor;
-uniform sampler2D noisetex;
-uniform sampler2D depthtex0;
-uniform int frameCounter;
-uniform float viewWidth;
 uniform float viewHeight;
+uniform float viewWidth;
+uniform int isEyeInWater;
 uniform vec3 fogColor;
-uniform mat4 gbufferProjection;
+uniform sampler2D depthtex0;
+uniform sampler2D depthtex1;
 uniform mat4 gbufferProjectionInverse;
-uniform float far;
-uniform int isEyeInWater; //0 = air, 1 = water, 2 = lava
-
 const bool colortex0MipmapEnabled = true;
 
 varying vec2 texcoord;
 
-vec2 clip(vec2 p)
+void main()
 {
-    p = (p*2.0) - 1.0;//clip space
-    return p;
-}
-vec2 unclip(vec2 p)
-{
-    p = (p+1.0)*0.5;//unclip space
-	return p;
-}
+    vec3 color = texture2D(gcolor, texcoord).rgb;
 
-vec2 distort(vec2 temptexcoord, float strength) //THANKYOU JustTech#2594 from sLABS!
-{//converts UVs to polar coordinates and back again. FOV dependant :D
-    vec2 clipcoord = temptexcoord - vec2(0.5);
-    float polarAngle = atan(clipcoord.x, clipcoord.y);
-    float polarDistance = length(clipcoord);
-    float distortAmount = strength * (-1.0);
-    polarDistance = polarDistance * (1.0 + distortAmount * polarDistance * polarDistance);
-    vec2 distortedUVs = vec2(0.5) + vec2(sin(polarAngle), cos(polarAngle)) * polarDistance;
-    return distortedUVs;
-}
-
-void main() {
-
-	float fov = 2 * atan(1 / gbufferProjection[0][0]);
-
-    vec2 newtexcoord = texcoord;
-
-    #ifdef BARREL_DISTORTION
-        newtexcoord = distort(newtexcoord, BARREL_POWER * fov * 0.5);
-		#if BARREL_CLIP_MODE == 1 //zoom
-			newtexcoord = clip(newtexcoord);
-			newtexcoord *= fov * 0.3;
-			newtexcoord = unclip(newtexcoord);
-		#endif
-    #endif
-
-	vec3 color = texture2D(gcolor, newtexcoord).rgb;
-
-	#ifdef ENABLE_ACES
-		color = sRGB_to_ACES(color);
-	#endif
-
-	#if SCANLINE_MODE != 0
-		#if SCANLINE_MODE == 1
-			if(mod(gl_FragCoord.y, SCANLINE_DISTANCE) < SCANLINE_THICKNESS)
-			{
-				color -= SCANLINE_STRENGTH;
-			}
-		#endif
-		#if SCANLINE_MODE == 2
-			color *= 0.92+0.08*(0.05-pow(clamp(sin(viewHeight/2.*texcoord.y+frameCounter/5.),0.,1.),1.5));
-		#endif
-		
-	#endif
-
-	#ifdef CHROMA_SAMPLING_ENABLED
-		vec3 chroma = normalize(textureLod(gcolor, newtexcoord, CHROMA_SAMPLING_SIZE).rgb);
-		float luma = (color.r + color.g + color.b / 3.0);
-		color = chroma * luma * 0.9;
-	#endif
-
-	#ifdef ROUND_FOG_ENABLED
-		vec3 screenPos = vec3(newtexcoord, texture2D(depthtex0, newtexcoord).r);
+    #ifdef ROUND_FOG_ENABLED
+		vec3 screenPos = vec3(texcoord, texture2D(depthtex0, texcoord).r);
 		vec3 clipPos = screenPos * 2.0 - 1.0;
 		vec4 tmp = gbufferProjectionInverse * vec4(clipPos, 1.0);
 		vec3 viewPos = tmp.xyz / tmp.w;
@@ -150,55 +74,38 @@ void main() {
 		}
 		
 		//float fogDensity = exp(-FOG_END * length(viewPos));
-		if(texture2D(depthtex0, newtexcoord).r != 1.0)
+		if(texture2D(depthtex0, texcoord).r != 1.0)
 		{
 			color = mix(color, fogColor, clamp(((length(viewPos)-fogNearValue)/fogFarValue), 0.0, 1.0));
 		}
-		
 	#endif
 
-	
-	#ifdef BARREL_DISTORTION
-		#if BARREL_CLIP_MODE == 0 //black bars
-		if(newtexcoord.x < 0.0 || newtexcoord.x > 1.0) { color = vec3(0.0); }
-		if(newtexcoord.y < 0.0 || newtexcoord.y > 1.0) { color = vec3(0.0); }
-		#endif
-		#if BARREL_CLIP_MODE == 2 //off
-		// :)
-		#endif
-	#endif
+    #ifdef ENABLE_DOF
+        float fragDistance = fragDepth(depthtex1, texcoord, gbufferProjectionInverse);
+        float cursorDistance = cursorDepth(gbufferProjectionInverse);
+        fragDistance = abs((near * far) / (fragDistance * (near - far) + far));
+        
+        cursorDistance = clamp(cursorDistance, 0.0, far);
+        fragDistance = clamp(fragDistance, 0.0, far);
 
-	#if SCANLINE_MODE == 3
-			float moduloPixLoc = mod(gl_FragCoord.x, 3);
-			if(mod(gl_FragCoord.y, 4) > 1)
-			{
-				if(moduloPixLoc > 0 && moduloPixLoc < 1)
-				{
-					color = vec3(color.r, 0.0, 0.0);
-				}
-				if(moduloPixLoc > 1 && moduloPixLoc < 2)
-				{
-					color = vec3(0.0, color.g, 0.0);
-				}
-				if(moduloPixLoc > 2 && moduloPixLoc < 3)
-				{
-					color = vec3(0.0, 0.0, color.b);
-				}
-			}
-			else
-			{
-				color = vec3(CRT_BOOST);
-			}
-		#endif
+        float blurAmount;
+        if(fragDistance > cursorDistance)
+        {
+            blurAmount = fragDistance - cursorDistance;
+        }
+        else
+        {
+            blurAmount = cursorDistance - fragDistance;
+        }
+        #if DOF_MODE == 0 //mip blur
+            color = textureLod(gcolor, texcoord, blurAmount * DOF_STRENGTH * 0.2).rgb;
+        #endif
+        #if DOF_MODE == 1 //GAUSSIAN_BLUR pass 1
+            blurAmount = blurAmount * DOF_STRENGTH * 0.5;
+            color = gaussianH(gcolor, texcoord, blurAmount, viewWidth);
+        #endif
+    #endif
 
-	#ifdef GRAIN_ENABLED	
-		float noiseSeed = frameCounter * 0.11;
-		vec2 noiseCoord = newtexcoord + vec2(sin(noiseSeed), cos(noiseSeed));
-		color -= texture2D(noisetex, noiseCoord).rgb*GRAIN_STRENGTH;
-	#endif
-
-	
-
-/* DRAWBUFFERS:0 */
-	gl_FragData[0] = vec4(color, 1.0); //gcolor
+    /* DRAWBUFFERS:0 */
+    gl_FragData[0] = vec4(color, 1.0);
 }

@@ -11,3 +11,6 @@ Todo
     - Light Leaks o.O
     - color grading
 - Anamorphic effects ( ͡° ͜ʖ ͡°)
+    - And other lens effects
+- Implement Proper™ gaussian blur
+- Implement bokeh blur

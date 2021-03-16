@@ -37,7 +37,16 @@ option.LAVA_FOG_R=Lava Fog Red
 option.LAVA_FOG_G=Lava Fog Green
 option.LAVA_FOG_B=Lava Fog Blue
 
-option.USE_INTERLACING=INTERLACING
+option.INTERLACING_ENABLED=INTERLACING
 option.INTERLACING_SIZE= Interlacing Size
 option.USE_GHOSTING=GHOSTING
 option.GHOSTING_STRENGTH = Ghosting Strength
+
+option.ENABLE_DOF=Depth Of Field
+value.DOF_MODE.DOF_MIP=Mipmap Blur
+value.DOF_MODE.DOF_GAUSSIAN=Gaussian Blur
+value.DOF_MODE.DOF_BOKEH=DO NOT USE
+option.DOF_MODE=DoF Mode
+option.DOF_STRENGTH=Blur Strength
+option.centerDepthHalflife=Focus Speed
+option.BLUR_STEPS=Blur Steps
