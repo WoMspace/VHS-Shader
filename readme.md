@@ -3,7 +3,6 @@ A shaderpack that attempts to emulate an old VHS tape.
 Todo
 - Random glitches
 - Occasional image transforms
-- Fix barrel distortion clipping zoom mode
 - Tonemapping? aces? DYNAMIC EXPOSURE?
 - Load in dimension rewind effect
 - FILM MODE???
@@ -11,3 +10,4 @@ Todo
     - Film shake
     - Light Leaks o.O
     - color grading
+- Anamorphic effects ( ͡° ͜ʖ ͡°)

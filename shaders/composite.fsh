@@ -1,5 +1,9 @@
 #version 130
 
+#include "lib/Tonemapping.glsl"
+
+//#define ENABLE_ACES // HIGHLY BROKEN!
+
 #define CHROMA_SAMPLING_SIZE 4.0// How big the chroma subsampling should be. Larger number = bigger artefacting.[1.0 2.0 3.0 4.0 5.0]
 #define CHROMA_SAMPLING_ENABLED // Should the chroma sub-sampling effect be used.
 
@@ -8,7 +12,7 @@
 #define BARREL_CLIP_BLACK 0
 #define BARREL_CLIP_ZOOM 1
 #define BARREL_CLIP_OFF 2
-#define BARREL_CLIP_MODE BARREL_CLIP_BLACK // How should barrel distortion artefacts be fixed. Black fills in the broken areas with black. Zoom enlarges the image to hide the broken areas! BROKEN! [BARREL_CLIP_BLACK BARREL_CLIP_ZOOM BARREL_CLIP_OFF]
+#define BARREL_CLIP_MODE BARREL_CLIP_BLACK // How should barrel distortion artefacts be fixed. Black fills in the broken areas with black. Zoom enlarges the image to hide the broken areas. [BARREL_CLIP_BLACK BARREL_CLIP_ZOOM BARREL_CLIP_OFF]
 
 #define SCANLINE_DISTANCE 5 // How many pixels between each line. [1 2 3 4 5 6 7 8 9 10 20 30 40 50 100 200]
 #define SCANLINE_STRENGTH 0.1 // How strong the scanline effect is. [0.01 0.05 0.1 0.2 0.3 0.4 0.5]
@@ -78,14 +82,24 @@ vec2 distort(vec2 temptexcoord, float strength) //THANKYOU JustTech#2594 from sL
 
 void main() {
 
-	float fov =(2 * atan(1 / gbufferProjection[0][0]));
+	float fov = 2 * atan(1 / gbufferProjection[0][0]);
 
     vec2 newtexcoord = texcoord;
+
     #ifdef BARREL_DISTORTION
         newtexcoord = distort(newtexcoord, BARREL_POWER * fov * 0.5);
+		#if BARREL_CLIP_MODE == 1 //zoom
+			newtexcoord = clip(newtexcoord);
+			newtexcoord *= fov * 0.3;
+			newtexcoord = unclip(newtexcoord);
+		#endif
     #endif
 
 	vec3 color = texture2D(gcolor, newtexcoord).rgb;
+
+	#ifdef ENABLE_ACES
+		color = sRGB_to_ACES(color);
+	#endif
 
 	#if SCANLINE_MODE != 0
 		#if SCANLINE_MODE == 1
@@ -97,28 +111,7 @@ void main() {
 		#if SCANLINE_MODE == 2
 			color *= 0.92+0.08*(0.05-pow(clamp(sin(viewHeight/2.*texcoord.y+frameCounter/5.),0.,1.),1.5));
 		#endif
-		#if SCANLINE_MODE == 3
-			float moduloPixLoc = mod(gl_FragCoord.x, 3);
-			if(mod(gl_FragCoord.y, 4) > 1)
-			{
-				if(moduloPixLoc < 1)
-				{
-					color = vec3(color.r, 0.0, 0.0);
-				}
-				if(moduloPixLoc < 2 && moduloPixLoc > 1)
-				{
-					color = vec3(0.0, color.g, 0.0);
-				}
-				if(moduloPixLoc < 3 && moduloPixLoc > 2)
-				{
-					color = vec3(0.0, 0.0, color.b);
-				}
-			}
-			else
-			{
-				color = vec3(CRT_BOOST);
-			}
-		#endif
+		
 	#endif
 
 	#ifdef CHROMA_SAMPLING_ENABLED
@@ -170,15 +163,33 @@ void main() {
 		if(newtexcoord.x < 0.0 || newtexcoord.x > 1.0) { color = vec3(0.0); }
 		if(newtexcoord.y < 0.0 || newtexcoord.y > 1.0) { color = vec3(0.0); }
 		#endif
-		#if BARREL_CLIP_MODE == 1 //zoom
-			vec2 cliptexcoord = clip(newtexcoord);
-			cliptexcoord *= 2;
-			newtexcoord = unclip(cliptexcoord);//zoom in
-		#endif
 		#if BARREL_CLIP_MODE == 2 //off
 		// :)
 		#endif
 	#endif
+
+	#if SCANLINE_MODE == 3
+			float moduloPixLoc = mod(gl_FragCoord.x, 3);
+			if(mod(gl_FragCoord.y, 4) > 1)
+			{
+				if(moduloPixLoc > 0 && moduloPixLoc < 1)
+				{
+					color = vec3(color.r, 0.0, 0.0);
+				}
+				if(moduloPixLoc > 1 && moduloPixLoc < 2)
+				{
+					color = vec3(0.0, color.g, 0.0);
+				}
+				if(moduloPixLoc > 2 && moduloPixLoc < 3)
+				{
+					color = vec3(0.0, 0.0, color.b);
+				}
+			}
+			else
+			{
+				color = vec3(CRT_BOOST);
+			}
+		#endif
 
 	#ifdef GRAIN_ENABLED	
 		float noiseSeed = frameCounter * 0.11;
