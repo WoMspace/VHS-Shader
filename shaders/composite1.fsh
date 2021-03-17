@@ -29,8 +29,6 @@ const int noiseTextureResolution = 512; // Size of the noise texture. Smaller nu
 uniform sampler2D gcolor;
 uniform sampler2D depthtex1;
 uniform mat4 gbufferProjectionInverse;
-uniform float viewHeight;
-uniform float viewWidth;
 uniform sampler2D noisetex;
 uniform sampler2D colortex2;
 const bool colortex2Clear = false;
@@ -62,8 +60,8 @@ void main()
         }
         #if DOF_MODE == 1 //gaussian blur
             //blurAmount = clamp(blurAmount * DOF_STRENGTH, 0.0, DOF_STRENGTH * 10.0);
-            blurAmount = blurAmount * DOF_STRENGTH * 0.5;
-            color = gaussianV(gcolor, texcoord, blurAmount, viewHeight);
+            blurAmount = blurAmount * DOF_STRENGTH * 0.03;
+            color = gaussianVertical(gcolor, texcoord, blurAmount);
         #endif
     #endif
 

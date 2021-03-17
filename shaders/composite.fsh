@@ -29,8 +29,6 @@
 const float centerDepthHalflife = 0.5; // How fast the focus should move. In seconds. [0.0 0.25 0.5 0.75 1.0 1.5 2.0]
 
 uniform sampler2D gcolor;
-uniform float viewHeight;
-uniform float viewWidth;
 uniform int isEyeInWater;
 uniform vec3 fogColor;
 uniform sampler2D depthtex0;
@@ -98,11 +96,15 @@ void main()
             blurAmount = cursorDistance - fragDistance;
         }
         #if DOF_MODE == 0 //mip blur
-            color = textureLod(gcolor, texcoord, blurAmount * DOF_STRENGTH * 0.2).rgb;
+            color = textureLod(gcolor, texcoord, clamp(blurAmount * DOF_STRENGTH * 2.0, 0.0, 4.0)).rgb;
         #endif
         #if DOF_MODE == 1 //GAUSSIAN_BLUR pass 1
-            blurAmount = blurAmount * DOF_STRENGTH * 0.5;
-            color = gaussianH(gcolor, texcoord, blurAmount, viewWidth);
+            blurAmount = blurAmount * DOF_STRENGTH * 0.03;
+            color = gaussianHorizontal(gcolor, texcoord, blurAmount);
+        #endif
+        #if DOF_MODE == 2 // Bokeh Blur
+            blurAmount = blurAmount * DOF_STRENGTH;
+            color = bokehBlur(gcolor, texcoord, blurAmount);
         #endif
     #endif
 
