@@ -1,3 +1,5 @@
+#include "bokeh.glsl"
+
 #define BLUR_STEPS 33.0 // How high quality the blur should be. [15.0 33.0 99.0]
 
 uniform float near;
@@ -6,6 +8,7 @@ uniform float centerDepthSmooth;
 uniform float viewWidth;
 uniform float viewHeight;
 uniform float aspectRatio;
+
 
 float hPixelOffset = 1/viewWidth;
 float vPixelOffset = 1/viewHeight;
@@ -64,29 +67,19 @@ vec3 gaussianVertical(sampler2D gcolor, vec2 uv, float blurAmount)
     return color;
 }
 
-/* Bokeh blur????????? */
+/* Bokeh blur!!!!! */
 
 vec3 bokehBlur(sampler2D gcolor, vec2 uv, float blurAmount)
 {
     vec3 retColor = vec3(0.0);
-    if(blurAmount > 0)
+    for(int i = 0; i < bokehOffsets.length(); i++)
     {
-        for(int angle = 0; angle < BLUR_STEPS; angle++)
-        {
-            for(int dist = 0; dist < blurAmount; dist++)
-            {
-                retColor += texture2D(gcolor, vec2(uv.x + (dist * cos(angle) * hPixelOffset), uv.y + (dist * sin(angle) * vPixelOffset))).rgb / (BLUR_STEPS * (blurAmount - dist));
-            }
-        }
-    }
-    else
-    {
-        retColor = texture2D(gcolor, uv).rgb;
+        float hOffset = uv.x + bokehOffsets[i].x * hPixelOffset * blurAmount;
+        float vOffset = uv.y + bokehOffsets[i].y * vPixelOffset * blurAmount;
+        retColor += texture2D(gcolor, vec2(hOffset, vOffset)).rgb / bokehOffsets.length();
     }
     return retColor;
 }
-
-
 
 /* For posterity: my first gaussian blur :>
 

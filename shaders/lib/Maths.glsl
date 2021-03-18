@@ -19,3 +19,17 @@ vec2 distort(vec2 temptexcoord, float strength) //THANKYOU JustTech#2594 from sL
     vec2 distortedUVs = vec2(0.5) + vec2(sin(polarAngle), cos(polarAngle)) * polarDistance;
     return distortedUVs;
 }
+
+float threshold(float color, float threshold)
+{
+    float tmp = clamp(color - threshold, 0.0, 1.0);
+    tmp *= threshold * 10.0;
+    return tmp;
+}
+
+vec3 threshold(vec3 color, float threshold)
+{
+    vec3 tmp = clamp(color - threshold, 0.0, 1.0);
+    tmp *= threshold * 10.0;
+    return tmp;
+}

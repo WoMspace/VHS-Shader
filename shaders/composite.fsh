@@ -24,8 +24,10 @@
 #define DOF_MIP 0 // Really low quality. Really fast.
 #define DOF_GAUSSIAN 1 // Higher quality. Pretty fast.
 #define DOF_BOKEH 2 // Very high quality. Slowest.
-#define DOF_MODE DOF_GAUSSIAN // Mipmap is REALLY fast, but low quality. Gaussian is pretty fast, but a lot higher quality. Bokeh is slowest, but REALLY high quality. [DOF_MIP DOF_GAUSSIAN DOF_BOKEH]
-#define DOF_STRENGTH 0.2 // How strong the blur should be. [0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
+#define DOF_MODE DOF_BOKEH // Mipmap is REALLY fast, but low quality. Gaussian is pretty fast, but a lot higher quality. Bokeh is slowest, but REALLY high quality. [DOF_MIP DOF_GAUSSIAN DOF_BOKEH]
+#define DOF_STRENGTH 0.2 // How strong the blur should be. [0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.2 1.4 1.8 2.4 3.0 4.0]
+#define DOF_AUTOFOCUS -1
+#define DOF_DISTANCE DOF_AUTOFOCUS // How should the focus be handled. [DOF_AUTOFOCUS 0 2 4 8 16 32 64 128 256 512]
 const float centerDepthHalflife = 0.5; // How fast the focus should move. In seconds. [0.0 0.25 0.5 0.75 1.0 1.5 2.0]
 
 uniform sampler2D gcolor;
@@ -80,12 +82,15 @@ void main()
 
     #ifdef DOF_ENABLED
         float fragDistance = fragDepth(depthtex1, texcoord, gbufferProjectionInverse);
-        float cursorDistance = cursorDepth(gbufferProjectionInverse);
         fragDistance = abs((near * far) / (fragDistance * (near - far) + far));
-        
-        cursorDistance = clamp(cursorDistance, 0.0, far);
         fragDistance = clamp(fragDistance, 0.0, far);
-
+        float cursorDistance;
+        #if DOF_DISTANCE == -1
+            cursorDistance = cursorDepth(gbufferProjectionInverse);
+            cursorDistance = clamp(cursorDistance, 0.0, far);
+        #else
+            cursorDistance = DOF_DISTANCE;
+        #endif
         float blurAmount;
         if(fragDistance > cursorDistance)
         {
@@ -104,6 +109,7 @@ void main()
         #endif
         #if DOF_MODE == 2 // Bokeh Blur
             //blurAmount = clamp(blurAmount * DOF_STRENGTH, 0.0, 10.0);
+            blurAmount = blurAmount * DOF_STRENGTH * 0.2;
             color = bokehBlur(gcolor, texcoord, blurAmount);
         #endif
     #endif

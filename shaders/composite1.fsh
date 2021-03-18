@@ -13,7 +13,7 @@
 #define DOF_MIP 0 // Really low quality. Really fast.
 #define DOF_GAUSSIAN 1 // Higher quality. Pretty fast.
 #define DOF_BOKEH 2 // Very high quality. Slowest.
-#define DOF_MODE DOF_GAUSSIAN // Mipmap is REALLY fast, but low quality. Gaussian is pretty fast, but a lot higher quality. Bokeh is slowest, but REALLY high quality. [DOF_MIP DOF_GAUSSIAN DOF_BOKEH]
+#define DOF_MODE DOF_BOKEH // Mipmap is REALLY fast, but low quality. Gaussian is pretty fast, but a lot higher quality. Bokeh is slowest, but REALLY high quality. [DOF_MIP DOF_GAUSSIAN DOF_BOKEH]
 #define DOF_STRENGTH 0.2 // How strong the blur should be. [0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
 
 #define GRAIN_STRENGTH 0.15 // How strong the noise is. [0.05 0.10 0.15 0.20 0.25 0.30 0.35 0.40 0.45 0.50]
@@ -42,23 +42,23 @@ void main()
     vec3 color = texture2D(gcolor, texcoord).rgb;
 
     #ifdef DOF_ENABLED
-        float fragDistance = fragDepth(depthtex1, texcoord, gbufferProjectionInverse);
-        float cursorDistance = cursorDepth(gbufferProjectionInverse);
-        fragDistance = abs((near * far) / (fragDistance * (near - far) + far));
-
-        cursorDistance = clamp(cursorDistance, 0.0, far);
-        fragDistance = clamp(fragDistance, 0.0, far);
-
-        float blurAmount;
-        if(fragDistance > cursorDistance)
-        {
-            blurAmount = fragDistance - cursorDistance;
-        }
-        else
-        {
-            blurAmount = cursorDistance - fragDistance;
-        }
         #if DOF_MODE == 1 //gaussian blur
+            float fragDistance = fragDepth(depthtex1, texcoord, gbufferProjectionInverse);
+            float cursorDistance = cursorDepth(gbufferProjectionInverse);
+            fragDistance = abs((near * far) / (fragDistance * (near - far) + far));
+
+            cursorDistance = clamp(cursorDistance, 0.0, far);
+            fragDistance = clamp(fragDistance, 0.0, far);
+
+            float blurAmount;
+            if(fragDistance > cursorDistance)
+            {
+                blurAmount = fragDistance - cursorDistance;
+            }
+            else
+            {
+                blurAmount = cursorDistance - fragDistance;
+            }
             //blurAmount = clamp(blurAmount * DOF_STRENGTH, 0.0, DOF_STRENGTH * 10.0);
             blurAmount = blurAmount * DOF_STRENGTH * 0.03;
             color = gaussianVertical(gcolor, texcoord, blurAmount);

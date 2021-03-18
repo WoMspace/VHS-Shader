@@ -45,11 +45,13 @@ option.GHOSTING_STRENGTH = Ghosting Strength
 option.DOF_ENABLED=Depth Of Field
 value.DOF_MODE.DOF_MIP=Mipmap Blur
 value.DOF_MODE.DOF_GAUSSIAN=Gaussian Blur
-value.DOF_MODE.DOF_BOKEH=DO NOT USE
+value.DOF_MODE.DOF_BOKEH=Bokeh Blur
 option.DOF_MODE=DoF Mode
 option.DOF_STRENGTH=Blur Strength
 option.centerDepthHalflife=Focus Speed
 option.BLUR_STEPS=Blur Steps
+option.DOF_DISTANCE=Focus Distance
+value.DOF_DISTANCE.DOF_AUTOFOCUS=Auto
 
 profile.OFF=Disabled
 profile.OFF.comment=Everything in the shader disabled.
