@@ -2,7 +2,7 @@
 
 #define BLUR_STEPS 33.0 // How high quality the blur should be. [15.0 33.0 99.0]
 #define DOF_ANAMORPHIC 1.0 // Aspect ratio of the bokeh. [0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.2 1.4 1.6 1.8 2.0 2.2 2.4 2.6 2.8 3.0]
-#define DOF_BOKEH_SAMPLES 256 // How many samples to use for the bokeh. [32 64 128 256 512 1024 2048]
+#define DOF_BOKEH_SAMPLES 256 // How many samples to use for the bokeh. [32 64 128 256 512]
 
 uniform float near;
 uniform float far;

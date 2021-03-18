@@ -12,7 +12,10 @@ Todo
     - color grading
 - Anamorphic effects ( ͡° ͜ʖ ͡°)
     - And other lens effects
-- Fix bokeh depth blending
+- Fix bokeh
+    - Fix depth blending
+    - Fix fog
+    - Fix autofocus
 - TAA..?
 
 
