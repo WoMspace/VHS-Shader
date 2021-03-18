@@ -52,6 +52,8 @@ option.centerDepthHalflife=Focus Speed
 option.BLUR_STEPS=Blur Steps
 option.DOF_DISTANCE=Focus Distance
 value.DOF_DISTANCE.DOF_AUTOFOCUS=Auto
+option.DOF_ANAMORPHIC=Anamorphic Depth of Field
+value.DOF_ANAMORPHIC.1.0=Disabled
 
 profile.OFF=Disabled
 profile.OFF.comment=Everything in the shader disabled.
