@@ -9,7 +9,7 @@
 
 #include "lib/Blurs.glsl"
 
-// #define ENABLE_DOF // Adds Depth of Field
+// #define DOF_ENABLED // Adds Depth of Field
 #define DOF_MIP 0 // Really low quality. Really fast.
 #define DOF_GAUSSIAN 1 // Higher quality. Pretty fast.
 #define DOF_BOKEH 2 // Very high quality. Slowest.
@@ -18,7 +18,7 @@
 
 #define GRAIN_STRENGTH 0.15 // How strong the noise is. [0.05 0.10 0.15 0.20 0.25 0.30 0.35 0.40 0.45 0.50]
 #define GRAIN_ENABLED // Should the grain effect be used.
-const int noiseTextureResolution = 512; // Size of the noise texture. Smaller number = bigger noise. [64 128 256 512 1024]
+const int noiseTextureResolution = 512; // Size of the noise texture. Smaller number = bigger noise. [64 128 256 512 1024 2048]
 
 #define CHROMA_SAMPLING_SIZE 4.0// How big the chroma subsampling should be. Larger number = bigger artefacting.[1.0 2.0 3.0 4.0 5.0]
 #define CHROMA_SAMPLING_ENABLED // Should the chroma sub-sampling effect be used.
@@ -41,7 +41,7 @@ void main()
 {
     vec3 color = texture2D(gcolor, texcoord).rgb;
 
-    #ifdef ENABLE_DOF
+    #ifdef DOF_ENABLED
         float fragDistance = fragDepth(depthtex1, texcoord, gbufferProjectionInverse);
         float cursorDistance = cursorDepth(gbufferProjectionInverse);
         fragDistance = abs((near * far) / (fragDistance * (near - far) + far));

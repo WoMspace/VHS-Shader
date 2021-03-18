@@ -10,7 +10,7 @@ value.SCANLINE_MODE.SCANLINE_MODE_WOMSPACE=WoMspace Scanlines
 value.SCANLINE_MODE.SCANLINE_MODE_SIRBIRD=SirBird Scanlines
 value.SCANLINE_MODE.SCANLINE_MODE_CRT=CRT Scanlines
 option.CRT_BOOST=CRT Boost
-option.BARREL_DISTORTION=Barrel Distortion
+option.BARREL_DISTORTION_ENABLED=Barrel Distortion
 option.BARREL_POWER=Barrel Distortion Power
 option.BARREL_CLIP_MODE=Barrel Clipping
 value.BARREL_CLIP_MODE.BARREL_CLIP_BLACK=Black Bars
@@ -22,7 +22,7 @@ option.GRAIN_ENABLED=GRAIN
 option.noiseTextureResolution = Inverse Grain Size
 
 screen.LIQUID_FOG=LIQUID FOG
-option.ROUND_FOG_ENABLED=Shader Fog
+option.SHADER_FOG_ENABLED=Shader Fog
 option.FOG_END=Fog End
 option.FOG_NEAR=Fog Start
 value.FOG_END.far=Render Distance
@@ -39,10 +39,10 @@ option.LAVA_FOG_B=Lava Fog Blue
 
 option.INTERLACING_ENABLED=INTERLACING
 option.INTERLACING_SIZE= Interlacing Size
-option.USE_GHOSTING=GHOSTING
+option.GHOSTING_ENABLED=GHOSTING
 option.GHOSTING_STRENGTH = Ghosting Strength
 
-option.ENABLE_DOF=Depth Of Field
+option.DOF_ENABLED=Depth Of Field
 value.DOF_MODE.DOF_MIP=Mipmap Blur
 value.DOF_MODE.DOF_GAUSSIAN=Gaussian Blur
 value.DOF_MODE.DOF_BOKEH=DO NOT USE
@@ -50,3 +50,14 @@ option.DOF_MODE=DoF Mode
 option.DOF_STRENGTH=Blur Strength
 option.centerDepthHalflife=Focus Speed
 option.BLUR_STEPS=Blur Steps
+
+profile.OFF=Disabled
+profile.OFF.comment=Everything in the shader disabled.
+profile.VHS=VHS Mode
+profile.VHS.comment=Emulates VHS tape encoding.
+profile.CRT=CRT Mode
+profile.CRT.comment=HARD ON THE EYES! Emulates a CRT display. You may want to change Scanline Mode.
+profile.CCTV=CCTV Mode
+profile.CCTV.comment=Emulates a CCTV camera feed.
+profile.BASIC_FILM=Basic Film
+profile.BASIC_FILM.comment=Emulates a simple film effect.

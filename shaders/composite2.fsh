@@ -18,10 +18,10 @@
 #define SCANLINE_MODE SCANLINE_MODE_WOMSPACE // Which Scanline effect to use. [SCANLINE_MODE_OFF SCANLINE_MODE_WOMSPACE SCANLINE_MODE_SIRBIRD SCANLINE_MODE_CRT]
 #define CRT_BOOST 0.1 // Boosts the brightness a bit to make it less dark. [0.0 0.1 0.2 0.3 0.4 0.5]
 
-// #define USE_GHOSTING // Ghosting effect.
+// #define GHOSTING_ENABLED // Ghosting effect.
 #define GHOSTING_STRENGTH 0.7 // The strength of the ghosting. [0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9]
 
-// #define BARREL_DISTORTION // Causes a rounding of the image.
+// #define BARREL_DISTORTION_ENABLED // Causes a rounding of the image.
 #define BARREL_POWER -0.5 // How strong the lens distortion should be. Negative = Barrel Distortion. Positive = Pincushion Distortion. [-1.0 -0.9 -0.8 -0.7 -0.6 -0.5 -0.4 -0.3 -0.2 -0.1 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
 #define BARREL_CLIP_BLACK 0
 #define BARREL_CLIP_ZOOM 1
@@ -41,7 +41,7 @@ void main()
 {
     vec2 newtexcoord = texcoord;
 
-    #ifdef BARREL_DISTORTION
+    #ifdef BARREL_DISTORTION_ENABLED
         float fov = 2 * atan(1 / gbufferProjection[0][0]);
         newtexcoord = distort(newtexcoord, BARREL_POWER * fov * 0.5);
 		#if BARREL_CLIP_MODE == 1 //zoom
@@ -54,16 +54,16 @@ void main()
     vec3 color = texture2D(gcolor, newtexcoord).rgb;
 
     #if SCANLINE_MODE != 0
-		#if SCANLINE_MODE == 1
+		#if SCANLINE_MODE == 1 // WoMspace Scanlines
 			if(mod(gl_FragCoord.y, SCANLINE_DISTANCE) < SCANLINE_THICKNESS)
 			{
 				color -= SCANLINE_STRENGTH;
 			}
 		#endif
-		#if SCANLINE_MODE == 2
+		#if SCANLINE_MODE == 2 // SirBird Scanlines
 			color *= 0.92+0.08*(0.05-pow(clamp(sin(viewHeight/2.*newtexcoord.y+frameCounter/5.),0.,1.),1.5));
 		#endif
-        #if SCANLINE_MODE == 3
+        #if SCANLINE_MODE == 3 //CRT Mode
 			float moduloPixLoc = mod(gl_FragCoord.x, 3);
 			if(mod(gl_FragCoord.y, 4) > 1)
 			{
@@ -89,13 +89,13 @@ void main()
 
     vec3 color2 = vec3(0.0);
 
-    #ifdef USE_GHOSTING
+    #ifdef GHOSTING_ENABLED
         color2 = texture2D(colortex3, texcoord).rgb;
         color2 = mix(color2, color, 1 - GHOSTING_STRENGTH);
         color = (color + color2)*0.5;
     #endif
 
-    #ifdef BARREL_DISTORTION
+    #ifdef BARREL_DISTORTION_ENABLED
 		#if BARREL_CLIP_MODE == 0 //black bars
 		if(newtexcoord.x < 0.0 || newtexcoord.x > 1.0) { color = vec3(0.0); }
 		if(newtexcoord.y < 0.0 || newtexcoord.y > 1.0) { color = vec3(0.0); }

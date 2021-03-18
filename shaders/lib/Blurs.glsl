@@ -5,6 +5,7 @@ uniform float far;
 uniform float centerDepthSmooth;
 uniform float viewWidth;
 uniform float viewHeight;
+uniform float aspectRatio;
 
 float hPixelOffset = 1/viewWidth;
 float vPixelOffset = 1/viewHeight;
@@ -68,12 +69,19 @@ vec3 gaussianVertical(sampler2D gcolor, vec2 uv, float blurAmount)
 vec3 bokehBlur(sampler2D gcolor, vec2 uv, float blurAmount)
 {
     vec3 retColor = vec3(0.0);
-    for(int angle = 0; angle < BLUR_STEPS; angle++)
+    if(blurAmount > 0)
     {
-        for(int dist = 0; dist < blurAmount; dist++)
+        for(int angle = 0; angle < BLUR_STEPS; angle++)
         {
-            retColor += texture2D(gcolor, vec2(uv.x + (dist * cos(angle) * hPixelOffset), uv.y + (dist * sin(angle) * vPixelOffset))).rgb / BLUR_STEPS;
+            for(int dist = 0; dist < blurAmount; dist++)
+            {
+                retColor += texture2D(gcolor, vec2(uv.x + (dist * cos(angle) * hPixelOffset), uv.y + (dist * sin(angle) * vPixelOffset))).rgb / (BLUR_STEPS * (blurAmount - dist));
+            }
         }
+    }
+    else
+    {
+        retColor = texture2D(gcolor, uv).rgb;
     }
     return retColor;
 }

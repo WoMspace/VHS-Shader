@@ -7,7 +7,7 @@
 
 #include "lib/Blurs.glsl"
 
-#define ROUND_FOG_ENABLED // Should the fog effect be used.
+#define SHADER_FOG_ENABLED // Should the fog effect be used.
 #define FOG_END far // How far away the fog should end. [32 64 128 far]
 #define FOG_NEAR 32 // How far away the fog should start. [0 2 4 8 16 32 64]
 #define WATER_FOG_R 0.1// Red channel of the water fog. [0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
@@ -20,7 +20,7 @@
 #define LAVA_FOG_DISTANCE 2.0 // How far the lava fog should go. [1.0 2.0 4.0 8.0]
 #define pi 3.14159 //pi babey
 
-// #define ENABLE_DOF // Adds Depth of Field
+// #define DOF_ENABLED // Adds Depth of Field
 #define DOF_MIP 0 // Really low quality. Really fast.
 #define DOF_GAUSSIAN 1 // Higher quality. Pretty fast.
 #define DOF_BOKEH 2 // Very high quality. Slowest.
@@ -42,7 +42,7 @@ void main()
 {
     vec3 color = texture2D(gcolor, texcoord).rgb;
 
-    #ifdef ROUND_FOG_ENABLED
+    #ifdef SHADER_FOG_ENABLED
 		vec3 screenPos = vec3(texcoord, texture2D(depthtex0, texcoord).r);
 		vec3 clipPos = screenPos * 2.0 - 1.0;
 		vec4 tmp = gbufferProjectionInverse * vec4(clipPos, 1.0);
@@ -78,7 +78,7 @@ void main()
 		}
 	#endif
 
-    #ifdef ENABLE_DOF
+    #ifdef DOF_ENABLED
         float fragDistance = fragDepth(depthtex1, texcoord, gbufferProjectionInverse);
         float cursorDistance = cursorDepth(gbufferProjectionInverse);
         fragDistance = abs((near * far) / (fragDistance * (near - far) + far));
@@ -103,7 +103,7 @@ void main()
             color = gaussianHorizontal(gcolor, texcoord, blurAmount);
         #endif
         #if DOF_MODE == 2 // Bokeh Blur
-            blurAmount = blurAmount * DOF_STRENGTH;
+            //blurAmount = clamp(blurAmount * DOF_STRENGTH, 0.0, 10.0);
             color = bokehBlur(gcolor, texcoord, blurAmount);
         #endif
     #endif
