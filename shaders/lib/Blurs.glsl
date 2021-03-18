@@ -2,6 +2,7 @@
 
 #define BLUR_STEPS 33.0 // How high quality the blur should be. [15.0 33.0 99.0]
 #define DOF_ANAMORPHIC 1.0 // Aspect ratio of the bokeh. [0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.2 1.4 1.6 1.8 2.0 2.2 2.4 2.6 2.8 3.0]
+#define DOF_BOKEH_SAMPLES 256 // How many samples to use for the bokeh. [32 64 128 256 512 1024 2048]
 
 uniform float near;
 uniform float far;
@@ -73,11 +74,11 @@ vec3 gaussianVertical(sampler2D gcolor, vec2 uv, float blurAmount)
 vec3 bokehBlur(sampler2D gcolor, vec2 uv, float blurAmount)
 {
     vec3 retColor = vec3(0.0);
-    for(int i = 0; i < bokehOffsets.length(); i++)
+    for(int i = 0; i < DOF_BOKEH_SAMPLES; i++)
     {
         float hOffset = uv.x + bokehOffsets[i].x * hPixelOffset * blurAmount;
         float vOffset = uv.y + bokehOffsets[i].y * vPixelOffset * blurAmount * DOF_ANAMORPHIC;
-        retColor += texture2D(gcolor, vec2(hOffset, vOffset)).rgb / bokehOffsets.length();
+        retColor += texture2D(gcolor, vec2(hOffset, vOffset)).rgb / DOF_BOKEH_SAMPLES;
     }
     return retColor;
 }

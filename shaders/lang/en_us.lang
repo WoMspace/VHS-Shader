@@ -54,6 +54,7 @@ option.DOF_DISTANCE=Focus Distance
 value.DOF_DISTANCE.DOF_AUTOFOCUS=Auto
 option.DOF_ANAMORPHIC=Anamorphic Depth of Field
 value.DOF_ANAMORPHIC.1.0=Disabled
+option.DOF_BOKEH_SAMPLES=Bokeh Samples
 
 profile.OFF=Disabled
 profile.OFF.comment=Everything in the shader disabled.
