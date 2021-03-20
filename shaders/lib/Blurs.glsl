@@ -1,8 +1,13 @@
-#include "bokeh.glsl"
-
 #define BLUR_STEPS 33.0 // How high quality the blur should be. [15.0 33.0 99.0]
 #define DOF_ANAMORPHIC 1.0 // Aspect ratio of the bokeh. [0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.2 1.4 1.6 1.8 2.0 2.2 2.4 2.6 2.8 3.0]
-#define DOF_BOKEH_SAMPLES 256 // How many samples to use for the bokeh. [32 64 128 256 512]
+#ifdef MC_GL_RENDERER_RADEON
+    #define DOF_BOKEH_SAMPLES 128 // How many samples to use for the bokeh. [32 64 128 256 512 1024 2048]
+#else
+    #define DOF_BOKEH_SAMPLES 128 // How many samples to use for the bokeh. [32 64 128 256 512]
+#endif
+#define DOF_BOKEH_MIPMAP // Smoothens a low bokeh sample count. Can make the bokeh pixellated.
+
+#include "bokeh.glsl"
 
 uniform float near;
 uniform float far;
@@ -78,7 +83,11 @@ vec3 bokehBlur(sampler2D gcolor, vec2 uv, float blurAmount)
     {
         float hOffset = uv.x + bokehOffsets[i].x * hPixelOffset * blurAmount;
         float vOffset = uv.y + bokehOffsets[i].y * vPixelOffset * blurAmount * DOF_ANAMORPHIC;
-        retColor += texture2D(gcolor, vec2(hOffset, vOffset)).rgb / DOF_BOKEH_SAMPLES;
+        #ifdef DOF_BOKEH_MIPMAP
+            retColor += texture2DLod(gcolor, vec2(hOffset, vOffset), clamp(blurAmount * 0.1, 0.0, 4.0)).rgb / DOF_BOKEH_SAMPLES;
+        #else
+            retColor += texture2D(gcolor, vec2(hOffset, vOffset)).rgb / DOF_BOKEH_SAMPLES;
+        #endif
     }
     return retColor;
 }

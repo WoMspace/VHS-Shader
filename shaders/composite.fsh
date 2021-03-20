@@ -82,7 +82,12 @@ void main()
 
     #ifdef DOF_ENABLED
         float fragDistance = fragDepth(depthtex1, texcoord, gbufferProjectionInverse);
+        
         fragDistance = abs((near * far) / (fragDistance * (near - far) + far));
+        /*fragDistance = fragDistance * (near - far) + far;
+        fragDistance = (near * far) / fragDistance;
+        fragDistance = abs(fragDistance);*/
+
         fragDistance = clamp(fragDistance, 0.0, far);
         float cursorDistance;
         #if DOF_DISTANCE == -1
@@ -91,15 +96,7 @@ void main()
         #else
             cursorDistance = DOF_DISTANCE;
         #endif
-        float blurAmount;
-        if(fragDistance > cursorDistance)
-        {
-            blurAmount = fragDistance - cursorDistance;
-        }
-        else
-        {
-            blurAmount = cursorDistance - fragDistance;
-        }
+        float blurAmount = abs(fragDistance - cursorDistance);
         #if DOF_MODE == 0 //mip blur
             color = textureLod(gcolor, texcoord, clamp(blurAmount * DOF_STRENGTH * 2.0, 0.0, 4.0)).rgb;
         #endif
@@ -109,11 +106,11 @@ void main()
         #endif
         #if DOF_MODE == 2 // Bokeh Blur
             //blurAmount = clamp(blurAmount * DOF_STRENGTH, 0.0, 10.0);
-            blurAmount = blurAmount * DOF_STRENGTH * 0.2;
+            blurAmount = blurAmount * DOF_STRENGTH * 0.05;
             color = bokehBlur(gcolor, texcoord, blurAmount);
         #endif
     #endif
-
+    //color = vec3(fragDistance/far);
     /* DRAWBUFFERS:0 */
     gl_FragData[0] = vec4(color, 1.0);
 }
