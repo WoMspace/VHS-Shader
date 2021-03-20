@@ -1,10 +1,13 @@
 #define BLUR_STEPS 33.0 // How high quality the blur should be. [15.0 33.0 99.0]
+#define DOF_STRENGTH 0.2 // How strong the blur should be. [0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.2 1.4 1.8 2.4 3.0 4.0]
 #define DOF_ANAMORPHIC 1.0 // Aspect ratio of the bokeh. [0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.2 1.4 1.6 1.8 2.0 2.2 2.4 2.6 2.8 3.0]
 #ifdef MC_GL_RENDERER_RADEON
     #define DOF_BOKEH_SAMPLES 128 // How many samples to use for the bokeh. [32 64 128 256 512 1024 2048]
 #else
     #define DOF_BOKEH_SAMPLES 128 // How many samples to use for the bokeh. [32 64 128 256 512]
 #endif
+#define DOF_AUTOFOCUS -1
+#define DOF_DISTANCE DOF_AUTOFOCUS // How should the focus be handled. [DOF_AUTOFOCUS 0 2 4 8 16 32 64 128 256 512]
 #define DOF_BOKEH_MIPMAP // Smoothens a low bokeh sample count. Can make the bokeh pixellated.
 
 #include "bokeh.glsl"
@@ -15,33 +18,58 @@ uniform float centerDepthSmooth;
 uniform float viewWidth;
 uniform float viewHeight;
 uniform float aspectRatio;
+uniform mat4 gbufferProjectionInverse;
 
 
 float hPixelOffset = 1/viewWidth;
 float vPixelOffset = 1/viewHeight;
 
-float fragDepth(sampler2D depthTex, vec2 uv, mat4 gbufferProjectionInverse)
+float fragDepth(sampler2D depthTex, vec2 uv)
 {
     float fragDistance = texture2D(depthTex, uv).r;
     return fragDistance;
 }
-float cursorDepth(mat4 gbufferProjectionInverse)
+
+float fragDistance(float fragDist)
+{
+    fragDist = abs((near * far) / (fragDist * (near - far) + far));
+    fragDist = clamp(fragDist, 0.0, far);
+    return fragDist;
+}
+
+float cursorDepth()
 {
     vec3 screenPos = vec3(0.5, 0.5, centerDepthSmooth);
     vec3 clipPos = screenPos * 2.0 - 1.0;
     vec4 tmp = gbufferProjectionInverse * vec4(clipPos, 1.0);
     vec2 viewpos = tmp.xz / tmp.w;
-    float cursorDistance = length(viewpos);
-    return cursorDistance;
+    return length(viewpos);
 }
 
+float cursorDistance(float cursorDist)
+{
+    #if DOF_DISTANCE == -1
+            cursorDist = cursorDepth();
+            cursorDist = clamp(cursorDist, 0.0, far);
+    #else
+            cursorDist = DOF_DISTANCE;
+    #endif
+    return cursorDist;
+}
+
+float findBlurAmount(float fragDistance, float cursorDistance)
+{
+    return abs(fragDistance - cursorDistance);
+}
+
+vec3 mipDoF(sampler2D gcolor, vec2 uv, float cursorDistance, sampler2D depthmap)
+{
+    return vec3(1.0);
+}
 
 /* Lets do an actual gaussian blur this time ( ͡° ͜ʖ ͡°) */
 // https://rastergrid.com/blog/2010/09/efficient-gaussian-blur-with-linear-sampling/
 
-//uniform float weight[5] = float[](0.2270270270, 0.1945945946, 0.1216216216, 0.0540540541, 0.0162162162);
-//uniform float weight[7] = float[](0.1766522545, 0.1605929586, 0.120444719, 0.07411982705, 0.03705991353, 0.01482396541, 0.004632489191);
-//uniform float weight[16] = float[](0.279847742,	0.246924479,	0.192052372,	0.131404255,	0.078842553,	0.04129848,	0.018772036,	0.007345579,	0.002448526,	0.000685587,	0.000158212,	2.92986E-05,	4.18552E-06,	4.32984E-07,	2.88656E-08,	9.31149E-10);
 uniform float weight[33] = float[](0.180737794,	0.175260891,	0.159796695,	0.136968596,	0.110335813,	0.083497372,	0.05932708,	0.039551387,	0.024719617,	0.01447002,	0.007924058,	0.004054169,	0.001934944,	0.000859975,	0.000355207,	0.000136037,	4.81797E-05,	1.57321E-05,	4.71964E-06,	1.29559E-06,	3.23897E-07,	7.33352E-08,	1.49387E-08,	2.71612E-09,	4.36519E-10,	6.12658E-11,	7.39415E-12,	7.51948E-13,	6.26623E-14,	4.109E-15,	1.98823E-16,	6.31183E-18,	9.86224E-20);
 
 vec3 gaussianHorizontal(sampler2D gcolor, vec2 uv, float blurAmount)
@@ -92,28 +120,35 @@ vec3 bokehBlur(sampler2D gcolor, vec2 uv, float blurAmount)
     return retColor;
 }
 
-/* For posterity: my first gaussian blur :>
+vec3 bokehBlur3PleaseShootMe(sampler2D gcolor, vec2 uv, sampler2D depthmap)
+{
+    float cursorDist = cursorDistance(cursorDepth());
+    float fragDist = fragDistance(fragDepth(depthmap, uv));
+    float blurAmount = findBlurAmount(fragDist, cursorDist) * 0.01 * DOF_STRENGTH;
 
-vec3 fakeGaussianHorizontal(sampler2D gcolor, vec2 uv, float blurAmount, float height)
-{//not actually a gaussian blur
-    vec3 color = vec3(0.0);
-    blurAmount = ceil(blurAmount);
-    float vPixelOffset = 1 / height;
-    for(float i = -blurAmount; i < blurAmount; i += (blurAmount * 2) / BLUR_STEPS)
+    vec3 retColor = vec3(0.0);
+    int samples = 0;
+    int attempts = 0;
+    while(samples < DOF_BOKEH_SAMPLES && attempts < DOF_BOKEH_SAMPLES)
     {
-        color += texture2D(gcolor, vec2(uv.x, uv.y + i*vPixelOffset)).rgb / BLUR_STEPS;
+        //float hOffset = uv.x + bokehOffsets[samples].x * hPixelOffset * blurAmount;
+        //float vOffset = uv.y + bokehOffsets[samples].y * vPixelOffset * blurAmount * DOF_ANAMORPHIC;
+        vec2 offset = vec2(uv.x + bokehOffsets[samples].x * hPixelOffset * blurAmount, uv.y + bokehOffsets[samples].y * vPixelOffset * blurAmount * DOF_ANAMORPHIC);
+        if(texture2D(depthmap, uv).r < texture2D(depthmap, offset).r && ) {
+            attempts++;
+            retColor += texture2D(gcolor, offset).rgb;
+            }
+        else
+        {
+            #ifdef DOF_BOKEH_MIPMAP
+                retColor += texture2DLod(gcolor, offset, clamp(blurAmount * 0.1, 0.0, 4.0)).rgb;
+            #else
+                retColor += texture2D(gcolor, offset).rgb;
+            #endif
+            samples++;
+        }
     }
-    return color;
+    //retColor = bokehBlur(gcolor, uv, blurAmount);
+    return retColor / (samples + attempts);
+    //return vec3(blurAmount);
 }
-
-vec3 fakeGaussianVertical(sampler2D gcolor, vec2 uv, float blurAmount, float width)
-{//not actually a gaussian blur
-    vec3 color = vec3(0.0);
-    blurAmount = ceil(blurAmount);
-    float hPixelOffset = 1 / width;
-    for(float i = -blurAmount; i < blurAmount; i += (blurAmount * 2) / BLUR_STEPS)
-    {
-        color += texture2D(gcolor, vec2(uv.x + i*hPixelOffset, uv.y)).rgb / BLUR_STEPS;
-    }
-    return color;
-} */

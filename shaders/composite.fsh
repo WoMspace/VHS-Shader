@@ -25,9 +25,6 @@
 #define DOF_GAUSSIAN 1 // Higher quality. Pretty fast.
 #define DOF_BOKEH 2 // Very high quality. Slowest.
 #define DOF_MODE DOF_BOKEH // Mipmap is REALLY fast, but low quality. Gaussian is pretty fast, but a lot higher quality. Bokeh is slowest, but REALLY high quality. [DOF_MIP DOF_GAUSSIAN DOF_BOKEH]
-#define DOF_STRENGTH 0.2 // How strong the blur should be. [0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.2 1.4 1.8 2.4 3.0 4.0]
-#define DOF_AUTOFOCUS -1
-#define DOF_DISTANCE DOF_AUTOFOCUS // How should the focus be handled. [DOF_AUTOFOCUS 0 2 4 8 16 32 64 128 256 512]
 const float centerDepthHalflife = 0.5; // How fast the focus should move. In seconds. [0.0 0.25 0.5 0.75 1.0 1.5 2.0]
 
 uniform sampler2D gcolor;
@@ -35,7 +32,6 @@ uniform int isEyeInWater;
 uniform vec3 fogColor;
 uniform sampler2D depthtex0;
 uniform sampler2D depthtex1;
-uniform mat4 gbufferProjectionInverse;
 const bool colortex0MipmapEnabled = true;
 
 varying vec2 texcoord;
@@ -80,23 +76,9 @@ void main()
 		}
 	#endif
 
-    #ifdef DOF_ENABLED
-        float fragDistance = fragDepth(depthtex1, texcoord, gbufferProjectionInverse);
+    color = bokehBlur3PleaseShootMe(gcolor, texcoord, depthtex1);
+    /*#ifdef DOF_ENABLED
         
-        fragDistance = abs((near * far) / (fragDistance * (near - far) + far));
-        /*fragDistance = fragDistance * (near - far) + far;
-        fragDistance = (near * far) / fragDistance;
-        fragDistance = abs(fragDistance);*/
-
-        fragDistance = clamp(fragDistance, 0.0, far);
-        float cursorDistance;
-        #if DOF_DISTANCE == -1
-            cursorDistance = cursorDepth(gbufferProjectionInverse);
-            cursorDistance = clamp(cursorDistance, 0.0, far);
-        #else
-            cursorDistance = DOF_DISTANCE;
-        #endif
-        float blurAmount = abs(fragDistance - cursorDistance);
         #if DOF_MODE == 0 //mip blur
             color = textureLod(gcolor, texcoord, clamp(blurAmount * DOF_STRENGTH * 2.0, 0.0, 4.0)).rgb;
         #endif
@@ -107,9 +89,10 @@ void main()
         #if DOF_MODE == 2 // Bokeh Blur
             //blurAmount = clamp(blurAmount * DOF_STRENGTH, 0.0, 10.0);
             blurAmount = blurAmount * DOF_STRENGTH * 0.05;
-            color = bokehBlur(gcolor, texcoord, blurAmount);
+            //color = bokehBlur(gcolor, texcoord, blurAmount);
+            color = bokehBlur3PleaseShootMe(gcolor, texcoord, blurAmount, depthtex1);
         #endif
-    #endif
+    #endif*/
     //color = vec3(fragDistance/far);
     /* DRAWBUFFERS:0 */
     gl_FragData[0] = vec4(color, 1.0);

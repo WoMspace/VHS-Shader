@@ -28,7 +28,6 @@ const int noiseTextureResolution = 512; // Size of the noise texture. Smaller nu
 
 uniform sampler2D gcolor;
 uniform sampler2D depthtex1;
-uniform mat4 gbufferProjectionInverse;
 uniform sampler2D noisetex;
 uniform sampler2D colortex2;
 const bool colortex2Clear = false;
