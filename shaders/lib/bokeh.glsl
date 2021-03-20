@@ -1,5 +1,5 @@
 #if DOF_BOKEH_SAMPLES == 32
-uniform vec2 bokehOffsets[32] = vec2[](
+const vec2 bokehOffsets[32] = vec2[](
     vec2(-0.8238510364885785, 0.559722549394253),
     vec2(-0.4379865448062421, 0.562222970467978),
     vec2(-0.39602072477284356, 0.034296893285075125),
@@ -35,7 +35,7 @@ uniform vec2 bokehOffsets[32] = vec2[](
 );
 #endif
 #if DOF_BOKEH_SAMPLES == 64
-uniform vec2 bokehOffsets[64] = vec2[](
+const vec2 bokehOffsets[64] = vec2[](
     vec2(-0.7059197212138122, -0.304599785186918),
     vec2(0.45917036120361154, -0.5960972644749394),
     vec2(0.4854948370041132, -0.8675446961590128),
@@ -104,7 +104,7 @@ uniform vec2 bokehOffsets[64] = vec2[](
 #endif
 
 #if DOF_BOKEH_SAMPLES == 128
-uniform vec2 bokehOffsets[128] = vec2[](
+const vec2 bokehOffsets[128] = vec2[](
     vec2(0.6037427244388156, 0.7765210621663909),
     vec2(0.9569922874944314, -0.015111245317497524),
     vec2(-0.4502778272926462, 0.29047435432285607),
@@ -237,7 +237,7 @@ uniform vec2 bokehOffsets[128] = vec2[](
 #endif
 
 #if DOF_BOKEH_SAMPLES == 256
-uniform vec2 bokehOffsets[256] = vec2[](
+const vec2 bokehOffsets[256] = vec2[](
     vec2(0.14824553471629232, 0.04650225459198132),
     vec2(0.6441439722903815, -0.4582440808383055),
     vec2(-0.9024014415785002, -0.356078416722303),
@@ -498,7 +498,7 @@ uniform vec2 bokehOffsets[256] = vec2[](
 #endif
 
 #if DOF_BOKEH_SAMPLES == 512
-uniform vec2 bokehOffsets[512] = vec2[](
+const vec2 bokehOffsets[512] = vec2[](
     vec2(-0.4113177216755961, -0.6007935422306951),
     vec2(-0.331636806611763, -0.3585233097485456),
     vec2(-0.39506967720709785, 0.8481569667257247),
@@ -1015,7 +1015,7 @@ uniform vec2 bokehOffsets[512] = vec2[](
 #endif
 
 #if DOF_BOKEH_SAMPLES == 1024
-uniform vec2 bokehOffsets[1024] = vec2[](
+const vec2 bokehOffsets[1024] = vec2[](
     vec2(0.22791872761364695, 0.7803911897005376),
     vec2(-0.07266055092521762, 0.18785498854451155),
     vec2(-0.8234917173714902, 0.07133186736194363),
@@ -2044,7 +2044,7 @@ uniform vec2 bokehOffsets[1024] = vec2[](
 #endif
 
 #if DOF_BOKEH_SAMPLES == 2048
-uniform vec2 bokehOffsets[2048] = vec2[](
+const vec2 bokehOffsets[2048] = vec2[](
     vec2(0.5134227353905303, -0.5946742836029151),
     vec2(-0.7889560078899158, 0.61326514342039),
     vec2(0.8107266385379603, 0.4864656304028423),

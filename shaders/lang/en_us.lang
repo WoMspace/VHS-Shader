@@ -57,6 +57,8 @@ value.DOF_ANAMORPHIC.1.0=Disabled
 option.DOF_BOKEH_SAMPLES=Bokeh Samples
 option.DOF_BOKEH_MIPMAP=Bokeh Mipmapping
 screen.BOKEH_SETTINGS=BOKEH SETTINGS
+value.DOF_BOKEH_SAMPLES.1024=§4AMD ONLY! 1024
+value.DOF_BOKEH_SAMPLES.2048=§4AMD ONLY! 2048
 
 profile.OFF=Disabled
 profile.OFF.comment=Everything in the shader disabled.
