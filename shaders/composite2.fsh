@@ -15,8 +15,16 @@
 #define SCANLINE_MODE_WOMSPACE 1
 #define SCANLINE_MODE_SIRBIRD 2
 #define SCANLINE_MODE_CRT 3
+#define SCANLINE_MODE_CRT_TEXTURE 4
 #define SCANLINE_MODE SCANLINE_MODE_WOMSPACE // Which Scanline effect to use. [SCANLINE_MODE_OFF SCANLINE_MODE_WOMSPACE SCANLINE_MODE_SIRBIRD SCANLINE_MODE_CRT]
+// #define CRT_TEXTURE_ENABLED // Should the CRT texture be used. Disabling this will use a pixel perfect, but less authentic CRT mode.
 #define CRT_BOOST 0.1 // Boosts the brightness a bit to make it less dark. [0.0 0.1 0.2 0.3 0.4 0.5]
+#define CRT_TEXTURE_SCALE 3.0 // How small should the CRT texture be. [1.0 2.0 3.0 4.0]
+#if SCANLINE_MODE == 3
+	#ifdef CRT_TEXTURE_ENABLED
+		uniform sampler2D colortex4;
+	#endif
+#endif
 
 // #define GHOSTING_ENABLED // Ghosting effect.
 #define GHOSTING_STRENGTH 0.7 // The strength of the ghosting. [0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9]
@@ -64,26 +72,31 @@ void main()
 			color *= 0.92+0.08*(0.05-pow(clamp(sin(viewHeight/2.*newtexcoord.y+frameCounter/5.),0.,1.),1.5));
 		#endif
         #if SCANLINE_MODE == 3 //CRT Mode
-			float moduloPixLoc = mod(gl_FragCoord.x, 3);
-			if(mod(gl_FragCoord.y, 4) > 1)
-			{
-				if(moduloPixLoc > 0 && moduloPixLoc < 1)
+			#ifdef CRT_TEXTURE_ENABLED // CRT TEXTURE (courtesy of s o u l n a t e#3527)
+				vec2 CRTtexcoord = vec2(texcoord.x * (viewWidth/1500) * CRT_TEXTURE_SCALE, texcoord.y * (viewHeight/1500) * CRT_TEXTURE_SCALE);
+				color *= texture2D(colortex4, CRTtexcoord).rgb;
+			#else
+				float moduloPixLoc = mod(gl_FragCoord.x, 3);
+				if(mod(gl_FragCoord.y, 4) > 1)
 				{
-					color = vec3(color.r, 0.0, 0.0);
+					if(moduloPixLoc > 0 && moduloPixLoc < 1)
+					{
+						color = vec3(color.r, 0.0, 0.0);
+					}
+					if(moduloPixLoc > 1 && moduloPixLoc < 2)
+					{
+						color = vec3(0.0, color.g, 0.0);
+					}
+					if(moduloPixLoc > 2 && moduloPixLoc < 3)
+					{
+						color = vec3(0.0, 0.0, color.b);
+					}
 				}
-				if(moduloPixLoc > 1 && moduloPixLoc < 2)
+				else
 				{
-					color = vec3(0.0, color.g, 0.0);
+					color = vec3(CRT_BOOST);
 				}
-				if(moduloPixLoc > 2 && moduloPixLoc < 3)
-				{
-					color = vec3(0.0, 0.0, color.b);
-				}
-			}
-			else
-			{
-				color = vec3(CRT_BOOST);
-			}
+			#endif
 		#endif
 	#endif
 

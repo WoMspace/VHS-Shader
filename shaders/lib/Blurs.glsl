@@ -84,7 +84,7 @@ vec3 bokehBlur(sampler2D gcolor, vec2 uv, float blurAmount)
         float hOffset = uv.x + bokehOffsets[i].x * hPixelOffset * blurAmount;
         float vOffset = uv.y + bokehOffsets[i].y * vPixelOffset * blurAmount * DOF_ANAMORPHIC;
         #ifdef DOF_BOKEH_MIPMAP
-            retColor += texture2DLod(gcolor, vec2(hOffset, vOffset), clamp(blurAmount * 0.1, 0.0, 4.0)).rgb / DOF_BOKEH_SAMPLES;
+            retColor += texture2DLod(gcolor, vec2(hOffset, vOffset), clamp(blurAmount * 0.3, 0.0, 4.0)).rgb / DOF_BOKEH_SAMPLES;
         #else
             retColor += texture2D(gcolor, vec2(hOffset, vOffset)).rgb / DOF_BOKEH_SAMPLES;
         #endif

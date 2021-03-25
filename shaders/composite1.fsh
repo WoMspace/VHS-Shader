@@ -1,6 +1,7 @@
 #version 130
 
 /* THIS FILE IS FOR CAMERA ENCODING EFFECTS
+- Bloom pass 2
 - Dof pass 2
 - Grain
 - Chroma Sampling
@@ -40,6 +41,10 @@ varying vec2 texcoord;
 void main()
 {
     vec3 color = texture2D(gcolor, texcoord).rgb;
+
+    #ifdef BLOOM_ENABLED
+    // do nothing lmao
+    #endif
 
     #ifdef DOF_ENABLED
         #if DOF_MODE == 1 //gaussian blur

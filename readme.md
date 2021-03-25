@@ -39,3 +39,8 @@ colortex3:
     Nonclearing
     Effects: Ghosting
     Holds: Accumulated main screen.
+colortex4:
+    Writes: shaders.properties
+    Reads: composite2
+    Effects: texture-based CRT mode
+    Holds: CRT RGB texture
