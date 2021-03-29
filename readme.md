@@ -20,12 +20,12 @@ Todo
 
 
 BUFFER USAGE:
-colortex0: gcolor
+- colortex0: gcolor
     Writes: composite0-2
     Reads: composite0-2
     Effects: 2-pass gaussian blur
     Holds: Main screen.
-colortex1:
+- colortex1:
     N/A
 colortex2:
     Writes: composite1

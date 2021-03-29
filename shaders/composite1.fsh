@@ -1,13 +1,13 @@
 #version 130
 
 /* THIS FILE IS FOR CAMERA ENCODING EFFECTS
-- Bloom pass 2
 - Dof pass 2
 - Grain
-- Chroma Sampling
+- Chroma Sub-Sampling
 - INTERLACING
 */
 
+#include "lib/Maths.glsl"
 #include "lib/Blurs.glsl"
 
 // #define DOF_ENABLED // Adds Depth of Field
@@ -34,7 +34,6 @@ uniform sampler2D noisetex;
 uniform sampler2D colortex2;
 const bool colortex2Clear = false;
 const bool colortex0MipmapEnabled = true;
-uniform int frameCounter;
 
 varying vec2 texcoord;
 

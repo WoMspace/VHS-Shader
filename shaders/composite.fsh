@@ -6,8 +6,8 @@
 - Bloom pass 1
 */
 
-#include "lib/Blurs.glsl"
 #include "lib/Maths.glsl"
+#include "lib/Blurs.glsl"
 
 #define SHADER_FOG_ENABLED // Should the fog effect be used.
 #define FOG_END far // How far away the fog should end. [32 64 128 far]
@@ -32,11 +32,10 @@
 #define DOF_DISTANCE DOF_AUTOFOCUS // How should the focus be handled. [DOF_AUTOFOCUS 0 2 4 8 16 32 64 128 256 512]
 const float centerDepthHalflife = 0.5; // How fast the focus should move. In seconds. [0.0 0.25 0.5 0.75 1.0 1.5 2.0]
 
-// #define BLOOM_ENABLED // Should the bloom effect be used.
-#define BLOOM_SIZE 2.0 // How big should the bloom effect be. [0.5 0.75 1.0 1.25 1.5 1.75 2.0 2.25 2.5 2.75 3.0]
-#define BLOOM_STRENGTH 0.5 // How strong should the bloom effect be. [0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
-#define BLOOM_THRESHOLD 0.8 // Minimum brightness for the bloom effect to work. [0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
-#define BLOOM_QUALITY 0.2 // Quality of the bloom effect. [1.0 0.9 0.8 0.7 0.6 0.5 0.4 0.3 0.2 0.1]
+// #define BLOOM_ENABLED // Should the bloom effect be used. Makes the image softer.
+#define BLOOM_STRENGTH 1.0 // How strong should the bloom effect be. [0.2 0.4 0.6 0.8 1.0 1.2 1.4 1.6 1.8 2.0]
+#define BLOOM_THRESHOLD 0.1 // Minimum brightness for the bloom effect to work. [0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
+#define BLOOM_QUALITY 1.0 // Quality of the bloom effect. [2.0 1.0 0.5 0.2]
 
 uniform sampler2D gcolor;
 uniform int isEyeInWater;
@@ -122,15 +121,16 @@ void main()
     #ifdef BLOOM_ENABLED
     //color += threshold(gaussianHorizontal(gcolor, texcoord, BLOOM_SIZE) * BLOOM_STRENGTH, BLOOM_THRESHOLD);
     vec3 bloom = vec3(0.0);
-    for(float i = 0.0; i < BLOOM_SIZE; bloom += BLOOM_QUALITY)
+    for(float i = 1.0; i < 11; i += BLOOM_QUALITY)
     {
-        bloom += texture2DLod(gcolor, texcoord, i).rgb;
+        bloom += texture2DLod(gcolor, texcoord, i/2).rgb;
     }
-    bloom = bloom / (BLOOM_SIZE/BLOOM_QUALITY);
-    color += bloom;
+
+    bloom = (bloom / (10 / BLOOM_QUALITY)) * BLOOM_STRENGTH;
+    color += threshold(bloom, BLOOM_THRESHOLD);
     #endif
 
-    //color = vec3(fragDistance/far);
+    //color = texture2DLod(gcolor, texcoord, 7.0).rgb;
     /* DRAWBUFFERS:0 */
     gl_FragData[0] = vec4(color, 1.0);
 }

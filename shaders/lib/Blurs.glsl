@@ -6,8 +6,12 @@
     #define DOF_BOKEH_SAMPLES 128 // How many samples to use for the bokeh. [32 64 128 256 512]
 #endif
 #define DOF_BOKEH_MIPMAP // Smoothens a low bokeh sample count. Can make the bokeh pixellated.
+#define DOF_BOKEH_NOISE // Makes the bokeh noisy, but smoother. BROKEN!
 
 #include "bokeh.glsl"
+
+#ifdef DOF_BOKEH_MIPMAP
+#endif
 
 uniform float near;
 uniform float far;
@@ -15,6 +19,8 @@ uniform float centerDepthSmooth;
 uniform float viewWidth;
 uniform float viewHeight;
 uniform float aspectRatio;
+uniform float frameCounter;
+uniform float frameTimeCounter;
 
 
 float hPixelOffset = 1/viewWidth;
@@ -83,7 +89,12 @@ vec3 bokehBlur(sampler2D gcolor, vec2 uv, float blurAmount)
     {
         float hOffset = uv.x + bokehOffsets[i].x * hPixelOffset * blurAmount;
         float vOffset = uv.y + bokehOffsets[i].y * vPixelOffset * blurAmount * DOF_ANAMORPHIC;
-        #ifdef DOF_BOKEH_MIPMAP
+        #ifdef DOF_BOKEH_NOISE
+            vec2 noiseOffset = generateNoiseV2(uv, frameTimeCounter) * blurAmount;
+            vOffset += noiseOffset.y * vPixelOffset;
+            hOffset += noiseOffset.x * hPixelOffset;
+        #endif
+        #ifdef DOF_BOKEH_MIPMAP //kinda broken lmao
             retColor += texture2DLod(gcolor, vec2(hOffset, vOffset), clamp(blurAmount * 0.3, 0.0, 4.0)).rgb / DOF_BOKEH_SAMPLES;
         #else
             retColor += texture2D(gcolor, vec2(hOffset, vOffset)).rgb / DOF_BOKEH_SAMPLES;
