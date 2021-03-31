@@ -20,6 +20,11 @@ vec2 distort(vec2 temptexcoord, float strength) //THANKYOU JustTech#2594 from sL
     return distortedUVs;
 }
 
+float average(vec3 incolor)
+{
+    return (incolor.r + incolor.g + incolor.b) / 3;
+}
+
 float threshold(float color, float threshold)
 {
     float tmp = clamp(color - threshold, 0.0, 1.0);

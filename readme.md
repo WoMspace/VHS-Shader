@@ -27,20 +27,20 @@ BUFFER USAGE:
     Holds: Main screen.
 - colortex1:
     N/A
-colortex2:
+- colortex2:
     Writes: composite1
     Reads: composite1
     Nonclearing
     Effects: Interlacing
     Holds: Main screen but a frame delayed.
-colortex3:
-    Writes: composite2
-    Reads: composite2
+- colortex3:
+    Writes: final
+    Reads: final
     Nonclearing
     Effects: Ghosting
     Holds: Accumulated main screen.
-colortex4:
+- colortex4:
     Writes: shaders.properties
-    Reads: composite2
+    Reads: final
     Effects: texture-based CRT mode
     Holds: CRT RGB texture

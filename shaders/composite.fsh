@@ -51,6 +51,8 @@ void main()
 {
     vec3 color = texture2D(gcolor, texcoord).rgb;
 
+    color = pow(color, vec3(2.2));
+
     #ifdef SHADER_FOG_ENABLED
 		vec3 screenPos = vec3(texcoord, texture2D(depthtex0, texcoord).r);
 		vec3 clipPos = screenPos * 2.0 - 1.0;

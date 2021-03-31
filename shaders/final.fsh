@@ -8,6 +8,10 @@
 - BARREL DISTORTION
 */
 
+/*
+  const int colortex0Format = RGBA16F;
+*/
+
 #include "lib/Maths.glsl"
 
 #define VHS_IMAGE_TRANSFORMS
