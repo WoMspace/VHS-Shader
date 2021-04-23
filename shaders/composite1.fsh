@@ -18,12 +18,23 @@
 #define DOF_MODE DOF_BOKEH // Mipmap is REALLY fast, but low quality. Gaussian is pretty fast, but a lot higher quality. Bokeh is slowest, but REALLY high quality. [DOF_MIP DOF_GAUSSIAN DOF_BOKEH]
 #define DOF_STRENGTH 0.2 // How strong the blur should be. [0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
 
-// #define GREYSCALE_ENABLED // Black and white like a film camera.
+#define FILM_DISABLED 0
+#define FILM_GREYSCALE 1 // Black and white like a film camera.
+#define FILM_COLOR 2 // Color film, like a Kodak Gold film.
+#define FILM_MODE FILM_DISABLED // Film emulation. [FILM_DISABLED FILM_GREYSCALE FILM_COLOR]
+#if FILM_MODE != 0
+#define FILM_BRIGHTNESS 0.0 // How bright the image should be. [-1.0 -0.9 -0.8 -0.7 -0.6 -0.5 -0.4 -0.3 -0.2 -0.1 0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
+#define FILM_CONTRAST 1.0 // How much contrast the film-like image should have. [0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0]
+#endif
+#if FILM_MODE == 1
 #define GREYSCALE_RED_CONTRIBUTION 1.0 // How much red should affect total luminance. [0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0]
 #define GREYSCALE_GREEN_CONTRIBUTION 1.0 // How much green should affect total luminance. [0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0]
 #define GREYSCALE_BLUE_CONTRIBUTION 1.0 // How much blue should affect total luminance. [0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0]
-#define GREYSCALE_CONTRAST 1.0 // How much contrast the film-like image should have. [0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0]
-#define GREYSCALE_BRIGHTNESS 0.0 // How bright the image should be. [-1.0 -0.9 -0.8 -0.7 -0.6 -0.5 -0.4 -0.3 -0.2 -0.1 0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
+#endif
+#if FILM_MODE == 2
+#define COLORFILM_SATURATION 1.0 // no idea how to implement this but it's important :P
+#define COLORFILM_STRENGTH 1.0 // How strong the film color simulation should be. [0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0]
+#endif
 
 #define GRAIN_STRENGTH 0.15 // How strong the noise is. [0.05 0.10 0.15 0.20 0.25 0.30 0.35 0.40 0.45 0.50]
 #define GRAIN_ENABLED // Should the grain effect be used.
@@ -83,17 +94,51 @@ void main()
 		color -= texture2D(noisetex, noiseCoord).rgb*GRAIN_STRENGTH;
 	#endif
 
-    #ifdef GREYSCALE_ENABLED
+    #if FILM_MODE == 1 // B&W
         vec3 greyscaleColor;
         greyscaleColor.r = color.r * GREYSCALE_RED_CONTRIBUTION;
         greyscaleColor.g = color.g * GREYSCALE_GREEN_CONTRIBUTION;
         greyscaleColor.b = color.b * GREYSCALE_BLUE_CONTRIBUTION;
 
-        greyscaleColor += GREYSCALE_BRIGHTNESS + 0.5;
-        greyscaleColor *= GREYSCALE_CONTRAST;
-        greyscaleColor -= GREYSCALE_BRIGHTNESS + 0.5;
+        greyscaleColor += FILM_BRIGHTNESS + 0.5;
+        greyscaleColor *= FILM_CONTRAST;
+        greyscaleColor -= FILM_BRIGHTNESS + 0.5;
 
         color = vec3((greyscaleColor.r + greyscaleColor.g + greyscaleColor.b) / 3);
+    #endif
+    #if FILM_MODE == 2 // Color film
+        vec3 filmColorHighlights = vec3(1.5, 1.0, 1.0);
+        vec3 filmColorShadows = vec3(1.0, 1.0, 1.5);
+        vec3 colorFilm = color;
+        colorFilm += FILM_BRIGHTNESS + 0.5;
+        colorFilm *= FILM_CONTRAST;
+        if(colorFilm.r > 0)
+        {
+            colorFilm.r *= filmColorHighlights.r * COLORFILM_STRENGTH;
+        }
+        if(colorFilm.g > 0)
+        {
+            colorFilm.g *= filmColorHighlights.g * COLORFILM_STRENGTH;
+        }
+        if(colorFilm.b > 0)
+        {
+            colorFilm.b *= filmColorHighlights.b * COLORFILM_STRENGTH;
+        }
+
+        if(colorFilm.r < 0)
+        {
+            colorFilm.r *= filmColorShadows.r * COLORFILM_STRENGTH;
+        }
+        if(colorFilm.g < 0)
+        {
+            colorFilm.g *= filmColorShadows.g * COLORFILM_STRENGTH;
+        }
+        if(colorFilm.b < 0)
+        {
+            colorFilm.b *= filmColorShadows.b * COLORFILM_STRENGTH;
+        }
+        colorFilm -= FILM_BRIGHTNESS + 0.5;
+        color = colorFilm;
     #endif
 
     #ifdef CHROMA_SAMPLING_ENABLED
