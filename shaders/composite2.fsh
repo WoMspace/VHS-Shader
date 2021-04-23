@@ -10,7 +10,7 @@
 
 #include "lib/Maths.glsl"
 
-#define VHS_IMAGE_TRANSFORMS
+// #define VHS_IMAGE_TRANSFORMS
 
 #define SCANLINE_DISTANCE 5 // How many pixels between each line. [1 2 3 4 5 6 7 8 9 10 20 30 40 50 100 200]
 #define SCANLINE_STRENGTH 0.1 // How strong the scanline effect is. [0.01 0.05 0.1 0.2 0.3 0.4 0.5]

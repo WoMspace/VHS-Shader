@@ -5,8 +5,8 @@
 #else
     #define DOF_BOKEH_SAMPLES 128 // How many samples to use for the bokeh. [32 64 128 256 512]
 #endif
-#define DOF_BOKEH_MIPMAP // Smoothens a low bokeh sample count. Can make the bokeh pixellated.
-#define DOF_BOKEH_NOISE // Makes the bokeh noisy, but smoother. BROKEN!
+// #define DOF_BOKEH_MIPMAP // Smoothens a low bokeh sample count. Can make the bokeh pixellated.
+// #define DOF_BOKEH_NOISE // Makes the bokeh noisy, but smoother. BROKEN!
 
 #include "bokeh.glsl"
 
@@ -19,7 +19,7 @@ uniform float centerDepthSmooth;
 uniform float viewWidth;
 uniform float viewHeight;
 uniform float aspectRatio;
-uniform float frameCounter;
+uniform int frameCounter;
 uniform float frameTimeCounter;
 
 

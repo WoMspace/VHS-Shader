@@ -70,7 +70,7 @@ void main()
     #endif
 
     #ifdef GRAIN_ENABLED	
-		float noiseSeed = frameCounter * 0.11;
+		float noiseSeed = float(frameCounter) * 0.11;
 		vec2 noiseCoord = texcoord + vec2(sin(noiseSeed), cos(noiseSeed));
 		color -= texture2D(noisetex, noiseCoord).rgb*GRAIN_STRENGTH;
 	#endif
