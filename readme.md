@@ -1,3 +1,5 @@
+# ARCHIVED REPO. REPLACEMENT REPO IS [HERE](https://github.com/WoMspace/Epoch-Shader)
+
 A shaderpack that attempts to emulate an old VHS tape.
 
 Todo
